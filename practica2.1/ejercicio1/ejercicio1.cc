@@ -1,3 +1,7 @@
+// AUTORES:
+// Arturo García Cárdenas
+// Mario Tabasco Vargas
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
