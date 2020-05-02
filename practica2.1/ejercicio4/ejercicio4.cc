@@ -64,28 +64,26 @@ int main(int argc, char **argv)
     // ---------------------------------------------------------------------- //
     ssize_t bytes;
 
-    while(1)
+    int sd_client = accept(sd, &client_addr, &client_len);
+
+    getnameinfo(&client_addr, client_len, host, NI_MAXHOST, service,
+    NI_MAXSERV, NI_NUMERICHOST | NI_NUMERICSERV);
+
+    std::cout << "Conexión desde " << host << " " << service << std::endl;
+
+    do
     {
-        int sd_client = accept(sd, &client_addr, &client_len);
+        char buffer[80];
 
-        getnameinfo(&client_addr, client_len, host, NI_MAXHOST, service,
-        NI_MAXSERV, NI_NUMERICHOST | NI_NUMERICSERV);
-
-        std::cout << "Conexión desde " << host << " " << service << std::endl;
-
-        do
+        bytes = recv(sd_client, (void *) buffer, sizeof(char)*79, 0);
+        if ( bytes <= 0 )
         {
-            char buffer[80];
+            std::cout << "Conexión terminada" << std::endl;
+        }
 
-            bytes = recv(sd_client, (void *) buffer, sizeof(char)*79, 0);
-            if ( bytes <= 0 )
-            {
-                std::cout << "Conexión terminada" << std::endl;
-            }
+        send(sd_client, (void *) buffer, bytes, 0);
+    } while(bytes > 0);
 
-            send(sd_client, (void *) buffer, bytes, 0);
-        } while(bytes > 0);
-    }
 
     return 0;
 }
