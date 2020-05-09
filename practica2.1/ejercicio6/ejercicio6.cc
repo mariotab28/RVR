@@ -171,11 +171,14 @@ int main(int argc, char **argv)
     // POOL DE THREADS
     // -------------------------------------------------------------------------
     std::vector<std::thread> pool;
+    std::vector<MyThread*> mtpool;
+    int numThreads = 5;
 
-    for (int i = 0; i < 5 ; ++i)
+    for (int i = 0; i < numThreads ; ++i)
     {
         MyThread* thread = new MyThread(sd, i);
         pool.push_back(std::thread(&MyThread::receive, thread));
+        mtpool.push_back(thread);
     }
 
     char c = 'x';
@@ -185,10 +188,12 @@ int main(int argc, char **argv)
     }
 
     std::cout << "Juntando hilos\n";
-    for (auto &t: pool)
+    for (int i = 0; i < numThreads ; ++i)
     {
+        std::thread &t = pool[i];
         t.detach();
-        t.~thread();
+        MyThread* mt = mtpool[i];
+        delete mt;
     }
     std::cout << "Cerrando servidor\n";
     close(sd);
