@@ -77,6 +77,64 @@ void ChatServer::do_messages()
         // - LOGIN: Añadir al vector clients
         // - LOGOUT: Eliminar del vector clients
         // - MESSAGE: Reenviar el mensaje a todos los clientes (menos el emisor)
+
+        /*for (int i = 0; i < clients; i++)
+        {
+            socket.recv(, clients[i]);
+        }*/
+        
+        Socket* client;
+        ChatMessage message;
+
+        if(socket.recv(message,client) == -1)
+        {
+            printf("recv -1\n");
+        }
+        
+        switch (message.type)
+        {
+        case ChatMessage::LOGIN:
+            // añadir el client al vector clients
+            clients.push_back(client);
+            break;
+
+        case ChatMessage::LOGOUT:
+            // buscar si existe el socket client en el vector clients
+            int i=0;
+            while(i<clients.size() && !(clients[i] == client))
+                i++;
+
+            // si lo encuentra, lo borra
+            if(i <clients.size())
+            {
+                clients.erase(clients.begin() + i);
+            }
+            
+            break;
+
+        case ChatMessage::MESSAGE:
+            // comprobar que el client este logeado (i.e. este en el vector
+            // clients)
+            int i=0;
+            while(i<clients.size() && !(clients[i] == client))
+                i++;
+
+            // si lo está hacer send del message a todos los
+            // clients menos al client
+            if(i <clients.size())
+            {
+                for (int j = 0; j < clients.size(); j++)
+                {
+                    if(j!=i)
+                        socket.send(message, clients[j]);
+                }
+            }
+            
+            break;
+        
+        default:
+            break;
+        }
     }
 }
 
