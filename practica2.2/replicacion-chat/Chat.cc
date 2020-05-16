@@ -90,16 +90,21 @@ void ChatServer::do_messages()
         {
             printf("recv -1\n");
         }
-        
+
         switch (message.type)
         {
         case ChatMessage::LOGIN:
+        {
+        
             // añadir el client al vector clients
+            printf("LOGIN: %s\n", message.nick.c_str());
             clients.push_back(client);
             break;
-
+        }
         case ChatMessage::LOGOUT:
+        {
             // buscar si existe el socket client en el vector clients
+            printf("LOGOUT: %s\n", message.nick.c_str());
             int i=0;
             while(i<clients.size() && !(clients[i] == client))
                 i++;
@@ -107,14 +112,17 @@ void ChatServer::do_messages()
             // si lo encuentra, lo borra
             if(i <clients.size())
             {
+                printf("BORRADO: %s\n", message.nick.c_str());
                 clients.erase(clients.begin() + i);
             }
             
             break;
-
+        }
         case ChatMessage::MESSAGE:
+        {
             // comprobar que el client este logeado (i.e. este en el vector
             // clients)
+            printf("MESSAGE: %s\n", message.nick.c_str());
             int i=0;
             while(i<clients.size() && !(clients[i] == client))
                 i++;
@@ -123,15 +131,19 @@ void ChatServer::do_messages()
             // clients menos al client
             if(i <clients.size())
             {
+                printf("ENVIADO: %s\n", message.nick.c_str());
                 for (int j = 0; j < clients.size(); j++)
                 {
                     if(j!=i)
-                        socket.send(message, clients[j]);
+                    {
+                        
+                        socket.send(message, *clients[j]);
+                    }
                 }
             }
             
             break;
-        
+        }
         default:
             break;
         }
@@ -150,7 +162,12 @@ void ChatClient::login()
 
 void ChatClient::logout()
 {
+    std::string msg;
 
+    ChatMessage em(nick, msg);
+    em.type = ChatMessage::LOGOUT;
+
+    socket.send(em, socket);
 }
 
 void ChatClient::input_thread()
@@ -159,7 +176,16 @@ void ChatClient::input_thread()
     {
         // Leer stdin con std::getline
         // Enviar al servidor usando socket
+        std::string msg;
+        std::getline(std::cin, msg);
+
+        ChatMessage em(nick, msg);
+        em.type = ChatMessage::MESSAGE;
+
+        socket.send(em, socket);
     }
+
+    logout();
 }
 
 void ChatClient::net_thread()
@@ -168,6 +194,12 @@ void ChatClient::net_thread()
     {
         //Recibir Mensajes de red
         //Mostrar en pantalla el mensaje de la forma "nick: mensaje"
+        //Socket* client;
+        ChatMessage msg;
+
+        socket.recv(msg);
+
+        printf("%s: %s\n", msg.nick.c_str(), msg.message.c_str());
     }
 }
 
