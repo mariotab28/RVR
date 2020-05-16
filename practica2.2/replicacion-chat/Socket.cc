@@ -27,11 +27,6 @@ Socket::Socket(const char * address, const char * port):sd(-1)
     sa = *res->ai_addr;
     sa_len = res->ai_addrlen;
 
-    if ( bind() != 0 )
-    {
-        std::cerr << "error bind" << std::endl;
-    }
-
     freeaddrinfo(res);
 }
 
@@ -44,7 +39,7 @@ int Socket::recv(Serializable &obj, Socket * &sock)
 
     ssize_t bytes = ::recvfrom(sd, buffer, MAX_MESSAGE_SIZE, 0, &sa, &sa_len);
 
-    if ( bytes <= 0 )
+    if ( bytes < 0 )
     {
         return -1;
     }
@@ -65,9 +60,9 @@ int Socket::send(Serializable& obj, const Socket& sock)
     obj.to_bin();
     
     //Enviar el objeto binario a sock usando el socket sd
-    ssize_t bytes = sendto(sd, obj.data(), strlen(obj.data()), 0, &sock.sa, sock.sa_len);
+    ssize_t bytes = sendto(sd, obj.data(), MAX_MESSAGE_SIZE/*strlen(obj.data())*/, 0, &sock.sa, sock.sa_len);
 
-    if ( bytes <= 0 )
+    if ( bytes < 0 )
     {
         return -1;
     }
@@ -80,7 +75,6 @@ bool operator== (const Socket &s1, const Socket &s2)
     //Comparar los campos sin_family, sin_addr.s_addr y sin_port
     //de la estructura sockaddr_in de los Sockets s1 y s2
     //Retornar false si alguno difiere
-
     sockaddr_in* sin1 = (struct sockaddr_in *) &(s1.sa);
     sockaddr_in* sin2 = (struct sockaddr_in *) &(s2.sa);
 
