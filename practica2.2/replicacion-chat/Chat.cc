@@ -38,12 +38,14 @@ int ChatMessage::from_bin(char * bobj)
         char auxNick[8];
         memcpy(static_cast<void*>(&auxNick), bobj, 8*sizeof(char));
         bobj += 8*sizeof(char);
+        auxNick[7] = '\0';
         nick = auxNick;
 
         // deserializamos message
         char auxMessage[80];
         memcpy(static_cast<void*>(&auxMessage), bobj, 80*sizeof(char));
         bobj += 80*sizeof(char);
+        message[79] = '\0';
         message = auxMessage;
 
         bobj -= MESSAGE_SIZE;
@@ -68,8 +70,8 @@ void ChatServer::do_messages()
         // - LOGOUT: Eliminar del vector clients
         // - MESSAGE: Reenviar el mensaje a todos los clientes (menos el emisor)
 
-        Socket* client;
-        std::cout << *client;
+        Socket* client = &socket;
+        //std::cout << *client;
         ChatMessage message;
 
         if(socket.recv(message,client) == -1)
@@ -94,7 +96,11 @@ void ChatServer::do_messages()
 
                 // si lo encuentra, lo borra
                 if(i < clients.size())
+                {
+                    delete clients[i];
+                    clients[i] = 0;
                     clients.erase(clients.begin() + i);
+                }
                 
                 break;
             }
@@ -144,10 +150,7 @@ void ChatClient::input_thread()
 
         // Si el cliente pulsa 'q' cierra su conexión
         if(msg == "q")
-        {
-            logout();
-            return;
-        }
+            break;
 
         ChatMessage em(nick, msg);
         em.type = ChatMessage::MESSAGE;
