@@ -13,11 +13,11 @@ void ChatMessage::to_bin()
     _data += sizeof(uint8_t);
 
     // serializar nick
-    memcpy(_data, static_cast<void*>((char*)nick.c_str()), sizeof(nick));
+    memcpy(_data, static_cast<void*>((char*)nick.c_str()), 8*sizeof(char));
     _data += 8*sizeof(char);
 
     // serializar mensaje
-    memcpy(_data, static_cast<void*>((char*)message.c_str()), sizeof(message));
+    memcpy(_data, static_cast<void*>((char*)message.c_str()), 80*sizeof(char));
     _data += 80*sizeof(char);
 
     // colocamos el puntero al inicio del fichero
@@ -70,8 +70,7 @@ void ChatServer::do_messages()
         // - LOGOUT: Eliminar del vector clients
         // - MESSAGE: Reenviar el mensaje a todos los clientes (menos el emisor)
 
-        Socket* client = &socket;
-        //std::cout << *client;
+        Socket* client;
         ChatMessage message;
 
         if(socket.recv(message,client) == -1)
@@ -83,39 +82,49 @@ void ChatServer::do_messages()
         {
             case ChatMessage::LOGIN:
             {
+                std::cout << "LOGIN " << *client<< "\n";
                 // añadir el client al vector clients
                 clients.push_back(client);
                 break;
             }
             case ChatMessage::LOGOUT:
             {
+                std::cout << "LOGOUT " << *client<< "\n";
                 // buscar si existe el socket client en el vector clients
-                int i=0;
-                while(i < clients.size() && !(*clients[i] == *client))
-                    i++;
-
-                // si lo encuentra, lo borra
-                if(i < clients.size())
+                for(auto it = clients.begin(); it != clients.end(); ++it)
                 {
-                    delete clients[i];
-                    clients[i] = 0;
-                    clients.erase(clients.begin() + i);
+                    if(*(*it) == *client)
+                    {
+                        delete *it;
+                        clients.erase(it);
+                        break;
+                    }
                 }
-                
+
                 break;
             }
             case ChatMessage::MESSAGE:
             {
                 // comprobar que el client este logeado (i.e. este en el vector
                 // clients)
-                for (auto c : clients)
-                    if(!(*c == *client)) socket.send(message, *c);
+                std::cout << "MESSAGE " << *client<< "\n";
+                for (auto it = clients.begin(); it != clients.end(); ++it)
+                {
+                    if(!(*(*it) == *client))
+                    {
+                        std::cout << "ENVIANDO A " << *(*it)<< "\n";
+                        socket.send(message, *(*it));
+                    }
+                }
                 
                 break;
             }
             default:
                 break;
         }
+
+        std::cout << "CLIENTS CONNECTED: " << clients.size() << "\n";
+        std::cout << "TYPE: " << (int) message.type << " NICK: "<<  message.nick  << " MESSAGE: " << message.message << "\n";
     }
 }
 
@@ -171,9 +180,6 @@ void ChatClient::net_thread()
 
         socket.recv(msg);
 
-        if(msg.type == ChatMessage::MESSAGE)
-        {
-            std::cout << msg.nick.c_str() << ": " << msg.message.c_str() << "\n";
-        }
+        std::cout << msg.nick.c_str() << ": " << msg.message.c_str() << "\n";
     }
 }

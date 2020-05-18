@@ -39,6 +39,8 @@ int Socket::recv(Serializable &obj, Socket * &sock)
 
     ssize_t bytes = ::recvfrom(sd, buffer, MAX_MESSAGE_SIZE, 0, &sa, &sa_len);
 
+    //std:: cout << bytes << "\n";
+
     if ( bytes < 0 )
     {
         return -1;
@@ -60,7 +62,7 @@ int Socket::send(Serializable& obj, const Socket& sock)
     obj.to_bin();
     
     //Enviar el objeto binario a sock usando el socket sd
-    ssize_t bytes = sendto(sd, obj.data(), MAX_MESSAGE_SIZE/*strlen(obj.data())*/, 0, &sock.sa, sock.sa_len);
+    ssize_t bytes = sendto(sd, obj.data(), /*MAX_MESSAGE_SIZE*/obj.size(), 0, &sock.sa, sock.sa_len);
 
     if ( bytes < 0 )
     {
