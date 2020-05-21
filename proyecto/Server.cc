@@ -1,7 +1,8 @@
 //#include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
-
 //#include <SFML/Graphics/Rect.hpp>
+
+#include "GameWorld.h"
 
 int main()
 {
@@ -9,6 +10,12 @@ int main()
     window.setTitle("Bouncy Tanks - SERVER");
     // background color
     sf::Color bg(180,180,180); //grey
+
+    GameWorld world;
+
+    world.createGameObject();
+
+
 
     // TANK---------
     // collider
@@ -73,9 +80,13 @@ int main()
         // Clear screen
         window.clear(bg);
         // Render
+        /*
         window.draw(sprite);
         window.draw(rankingText);
-        window.draw(highScoreText);
+        window.draw(highScoreText);*/
+        world.handleInput();
+        world.update();
+        world.render(window);
 
         // Update the window
         window.display();

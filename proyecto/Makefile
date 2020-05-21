@@ -1,7 +1,7 @@
 CC=g++
 CFLAGS=-g -I. -std=c++11
-#DEPS = Socket.h Chat.h
-#OBJ = Server.o Chat.o
+DEPS = GameWorld.h GameObject.h 
+OBJ = GameWorld.o GameObject.o
 LIBS=-lpthread -lsfml-graphics -lsfml-window -lsfml-system
 
 %.o: %.cc $(DEPS)
@@ -9,15 +9,16 @@ LIBS=-lpthread -lsfml-graphics -lsfml-window -lsfml-system
 
 all: BTServer
 
-BTServer: Server.o
+BTServer: $(OBJ) Server.o
 	g++ -o $@ $^ $(CFLAGS) $(LIBS)
 
-#cc: $(OBJ) ChatClient.o
+#BTClient: $(OBJ) Client.o
 	#g++ -o $@ $^ $(CFLAGS) $(LIBS)
 
 
 .PHONY: clean
 
 clean:
-	rm -f *.o BTServer
+	rm -f *.o BTServer 
+#BTClient
 
