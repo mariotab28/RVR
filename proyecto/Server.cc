@@ -3,23 +3,45 @@
 //#include <SFML/Graphics/Rect.hpp>
 
 #include "GameWorld.h"
+#include "GameObject.h"
 
 int main()
 {
-    sf::RenderWindow window(sf::VideoMode(800, 600), "SFML works!");
+    // ----WINDOW CREATION-----
+    sf::RenderWindow window(sf::VideoMode(800, 600), "Window title");
     window.setTitle("Bouncy Tanks - SERVER");
     // background color
-    sf::Color bg(180,180,180); //grey
+    sf::Color bg(180, 180, 180); //grey
 
+    // ----LOAD RESOURCES-----
     GameWorld world;
+    world.loadTexture("assets/tankBase.png");
+    world.loadTexture("assets/tankGun.png");
 
-    world.createGameObject();
+    world.loadFont("assets/arial.ttf");
 
+    // TEST
 
+    int highScore = 5;
+
+    GameObject *tank1 = world.createSprite(0);
+    tank1->setPosition(200, 200);
+    tank1->setScale(0.5f, 0.5f);
+    //tank1->setOrigin();
+
+    GameObject *text1 = world.createText(0, 20);
+    text1->setPosition(20, 60);
+    text1->setText("RANKING");
+
+    GameObject *text2 = world.createText(0, 20);
+    text2->setPosition(20, 20);
+    text2->setText("HIGH SCORE: " + std::to_string(highScore));
+
+    //world.createGameObject();
 
     // TANK---------
     // collider
-    sf::IntRect tankRect(0, 0, 50, 50);
+    /*sf::IntRect tankRect(0, 0, 50, 50);
     // render
     sf::Texture texture;
     if (!texture.loadFromFile("Assets/tankBase.png"))
@@ -35,23 +57,7 @@ int main()
     posX = 200;
     posY = 200;
     int angle = 0;
-    sprite.setPosition(posX, posY);
-    //--------------
-
-    //texture.setSmooth
-    //sf::Rectangle b1.setFillColor(sf::Color::Green);
-
-    // Create a graphical text to display
-    sf::Font font;
-    if (!font.loadFromFile("Assets/arial.ttf"))
-        return EXIT_FAILURE;
-
-    int highScore = 2;
-
-    sf::Text rankingText("RANKING", font, 30);
-    rankingText.setPosition(10, 10);
-    sf::Text highScoreText("HIGH SCORE: " + std::to_string(highScore), font, 30);
-    highScoreText.setPosition(10, 50);
+    sprite.setPosition(posX, posY);*/
 
     while (window.isOpen())
     {
@@ -63,7 +69,7 @@ int main()
             else if (event.type == sf::Event::KeyPressed)
             {
                 // MOVEMENT INPUT
-                if (event.key.code == sf::Keyboard::D)
+                /*if (event.key.code == sf::Keyboard::D)
                     angle++;
                 if (event.key.code == sf::Keyboard::A)
                     angle--;
@@ -73,18 +79,16 @@ int main()
                     posY++;
 
                 sprite.setPosition(posX, posY);
-                sprite.setRotation(angle);
+                sprite.setRotation(angle);*/
+                ;
             }
         }
 
         // Clear screen
         window.clear(bg);
+
         // Render
-        /*
-        window.draw(sprite);
-        window.draw(rankingText);
-        window.draw(highScoreText);*/
-        world.handleInput();
+        world.handleInput(window);
         world.update();
         world.render(window);
 
