@@ -1,55 +1,38 @@
-#ifndef GAMEOBJECT_H_
-#define GAMEOBJECT_H_
+#ifndef PLAYER_H_
+#define PLAYER_H_
 
-#include "Serializable.h"
-#include <string>
+#include "GameObject.h"
 
 namespace sf
 {
-    class Transformable;
     class RenderWindow;
-    class Texture;
-    class Font;
+    class Event;
 }; // namespace sf
 
-class GameObject : public Serializable
+class Player : public GameObject
 {
 private:
-    sf::Transformable *entity;
-    //sf::Texture *texture;
-    //sf::Font *font;
+    GameObject *gun;
 
-    /*enum TYPE
-    {
-        TEXT,
-        SPRITE
-    };*/
+    float incAngle;
+
+    float mouseX, mouseY;
 
     // info a serializar
-    int type;
-    char *id;
-
-    int x, y;
-    float angle;
 
 public:
-    GameObject(int type);
-    virtual ~GameObject();
+    Player(GameWorld* world);
+    virtual ~Player();
 
     virtual void render(sf::RenderWindow &window);
     virtual void update();
-    virtual void handleInput(sf::RenderWindow &window);
+    virtual void handleInput(sf::Event &event);
 
-    void setText(const std::string &text);
-    void setTexture(const sf::Texture &texture);
-    void setFont(const sf::Font &font);
-
-    void setPosition(int x, int y);
-    void setScale(float factorX, float factorY);
-    void setOrigin(float originX, float originY);
+    void setGunTexture(sf::Texture &texture);
+    void shoot();
 
     void to_bin();
     int from_bin(char *data);
 };
 
-#endif /* GAMEOBJECT_H_ */
+#endif /* PLAYER_H_ */

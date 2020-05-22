@@ -1,116 +1,119 @@
-#include "GameObject.h"
+#include "Player.h"
 
 #include <SFML/Graphics.hpp>
 
-GameObject::GameObject(int type)
-    : Serializable(), type(type)
+#include "GameWorld.h"
+#include <math.h>
+
+Player::Player(GameWorld *world) : GameObject(world, 1)
 {
-    switch (type)
-    {
-    case 0: // TEXT GAMEOBJECT
-    {
-        entity = new sf::Text();
-        //sf::Text *text = static_cast<sf::Text *>(entity);
+    gun = new GameObject(world, 1);
+    gun->setScale(0.5, 0.5);
 
-        /*text->setFont(*font);
-        text->setCharacterSize(20);
-        text->setString("RANKING");*/
-
-        printf("text created\n");
-
-        break;
-    }
-    case 1: // SPRITE GAMEOBJECT
-    {
-        entity = new sf::Sprite();
-
-        /*sf::Sprite *sprite = static_cast<sf::Sprite *>(entity);
-        sprite->setTexture(*texture);
-        sprite->setPosition(x, y);*/
-
-        break;
-    }
-    default:
-    {
-        printf("ERROR: invalid type of GO\n");
-        break;
-    }
-    }
+    incAngle = 0;
 }
 
-GameObject::~GameObject()
+Player::~Player()
 {
-    if (entity != nullptr)
-        delete entity;
-    /*if (texture != nullptr)
-        delete texture;
-    if (font != nullptr)
-        delete font;*/
+    if (gun != nullptr)
+        delete gun;
 }
 
-void GameObject::setText(const std::string &text)
+void Player::render(sf::RenderWindow &window)
 {
-    if (type == 0)
-        static_cast<sf::Text *>(entity)->setString(text);
-    else
-        printf("ERROR: trying to setText to a non-text GO\n");
+    GameObject::render(window);
+
+    gun->render(window);
+
+    mouseX = sf::Mouse::getPosition(window).x;
+    mouseY = sf::Mouse::getPosition(window).y;
 }
 
-void GameObject::setTexture(const sf::Texture &texture)
+void Player::update()
 {
-    if (type == 1)
-        static_cast<sf::Sprite *>(entity)->setTexture(texture);
-    else
-        printf("ERROR: trying to setTexture to a non-sprite GO\n");
-}
+    // BASE UPDATE-------------
+    GameObject::update();
 
-void GameObject::setFont(const sf::Font &font)
-{
-    if (type == 0)
-        static_cast<sf::Text *>(entity)->setFont(font);
-    else
-        printf("ERROR: trying to setFont to a non-text GO\n");
-}
+    angle += incAngle;
 
-void GameObject::setPosition(int x, int y)
-{
-    this->x = x;
-    this->y = y;
-    entity->setPosition(x, y);
-}
+    // GUN UPDATE-------------
+    gun->setPosition(x, y);
 
-void GameObject::setScale(float factorX, float factorY)
-{
-    entity->setScale(factorX, factorY);
-}
+    gun->setRotation(atan2(mouseY - y, mouseX - x) * 180 / PI);
 
-void GameObject::setOrigin(float originX, float originY)
-{
-    entity->setOrigin(originX, originY);
-}
-
-void GameObject::render(sf::RenderWindow &window)
-{
-    if (type == 0)
-        window.draw(*static_cast<sf::Text *>(entity));
-    else
-        window.draw(*static_cast<sf::Sprite *>(entity));
-}
-
-void GameObject::update()
-{
     // pos + velocity
 }
 
-void GameObject::handleInput(sf::RenderWindow &window)
+void Player::handleInput(sf::Event &event)
+{
+    if (event.type == sf::Event::KeyPressed)
+    {
+        // MOVEMENT INPUT
+        if (event.key.code == sf::Keyboard::D)
+            incAngle = 0.5;
+        if (event.key.code == sf::Keyboard::A)
+            incAngle = -0.5;
+        if (event.key.code == sf::Keyboard::W)
+            speed = 0.3;
+        if (event.key.code == sf::Keyboard::S)
+            speed = -0.3;
+
+        /*if (event.key.code == sf::Keyboard::Space)
+            shoot();*/
+    }
+
+    if (event.type == sf::Event::KeyReleased)
+    {
+        if (event.key.code == sf::Keyboard::D)
+            incAngle = 0;
+        if (event.key.code == sf::Keyboard::A)
+            incAngle = 0;
+        if (event.key.code == sf::Keyboard::W)
+            speed = 0;
+        if (event.key.code == sf::Keyboard::S)
+            speed = 0;
+    }
+
+    if (event.type == sf::Event::MouseButtonPressed)
+    {
+        shoot();
+    }
+}
+
+void Player::shoot()
+{
+
+    if (world != nullptr)
+    {
+        float gunAngle = gun->getRotation();
+
+        world->createBullet(x + cosf(gunAngle * PI / 180) * 100,
+                            y + sinf(gunAngle * PI / 180) * 100,
+                            gunAngle);
+    }
+    /*
+    
+    // coger del pool de balas
+    // si no hay ninguna desactivada, se crea una nueva
+    // EL VECTOR DE BALAS TIENE QUE TENERLO EL GAMEWORLD
+    
+    Bullet* b = new Bullet();
+    bullets.push_back();
+    */
+}
+
+void Player::setGunTexture(sf::Texture &texture)
+{
+    gun->setTexture(texture);
+    gun->setOrigin(gun->getTexture()->getSize().x * 0.3,
+                   gun->getTexture()->getSize().y * 0.5);
+}
+
+void Player::to_bin()
 {
 }
 
-void GameObject::to_bin()
-{
-}
-
-int GameObject::from_bin(char *data)
+int Player::from_bin(char *data)
 {
     return 0;
 }
