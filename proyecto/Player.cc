@@ -29,10 +29,10 @@ void Player::render(sf::RenderWindow &window)
     mouseY = sf::Mouse::getPosition(window).y;
 }
 
-void Player::update()
+void Player::update(sf::RenderWindow &window)
 {
     // BASE UPDATE-------------
-    GameObject::update();
+    GameObject::update(window);
 
     angle += incAngle;
 

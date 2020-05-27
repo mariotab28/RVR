@@ -25,7 +25,7 @@ public:
     virtual ~Player();
 
     virtual void render(sf::RenderWindow &window);
-    virtual void update();
+    virtual void update(sf::RenderWindow &window);
     virtual void handleInput(sf::Event &event);
 
     void setGunTexture(sf::Texture &texture);

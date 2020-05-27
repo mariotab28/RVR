@@ -22,6 +22,8 @@ int main()
     world.loadTexture("assets/tankBase.png");
     world.loadTexture("assets/tankGun.png");
     world.loadTexture("assets/bullet.png");
+    world.loadTexture("assets/gear.png");
+
 
     world.loadFont("assets/arial.ttf");
 
@@ -58,7 +60,7 @@ int main()
 
         // Render
         world.handleInput(window);
-        world.update();
+        world.update(window);
         world.render(window);
 
         // Update the window

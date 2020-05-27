@@ -36,9 +36,10 @@ public:
     bool loadFont(const std::string &fontFilename);
 
     void createBullet(float posX, float posY, float angle);
+    void destroy(GameObject* go);
 
     void render(sf::RenderWindow &window);
-    void update();
+    void update(sf::RenderWindow &window);
     void handleInput(sf::RenderWindow &window);
 };
 

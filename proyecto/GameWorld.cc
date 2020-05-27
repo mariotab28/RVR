@@ -6,6 +6,7 @@
 #include "GameObject.h"
 #include "Player.h"
 #include "Bullet.h"
+#include "Gear.h"
 
 GameWorld::GameWorld()
 {
@@ -34,16 +35,29 @@ void GameWorld::init()
     tank1->setScale(0.5f, 0.5f);*/
     //tank1->setOrigin();
 
+    // TEST GEARS
+
+    Gear *g = new Gear(this);
+    g->setTexture(*textures[3]);
+    g->setScale(0.8, 0.8);
+    g->setPosition(500, 500);
+    g->setOrigin(g->getTexture()->getSize().x * 0.5,
+                 g->getTexture()->getSize().y * 0.5);
+
+    gameObjects.push_back(g);
+
     // -----CREATE PLAYER------
     Player *player = new Player(this);
     player->setTexture(*textures[0]);
-    player->setOrigin(player->getTexture()->getSize().x*0.5,
-        player->getTexture()->getSize().y*0.5);
+    player->setOrigin(player->getTexture()->getSize().x * 0.5,
+                      player->getTexture()->getSize().y * 0.5);
     player->setGunTexture(*textures[1]);
     gameObjects.push_back(player);
 
     player->setPosition(200, 200);
     player->setScale(0.5f, 0.5f);
+
+    // ------CREATE TEXTS------
 
     GameObject *text1 = createText(0, 20);
     text1->setPosition(20, 60);
@@ -52,6 +66,8 @@ void GameWorld::init()
     GameObject *text2 = createText(0, 20);
     text2->setPosition(20, 20);
     text2->setText("HIGH SCORE: " + std::to_string(highScore));
+
+
 }
 
 GameObject *GameWorld::createSprite(int texture)
@@ -101,10 +117,27 @@ void GameWorld::createBullet(float posX, float posY, float angle)
     b->setPosition(posX, posY);
     b->setSpeed(2);
     b->setRotation(angle);
-    b->setOrigin(b->getTexture()->getSize().x*0.5,
-        b->getTexture()->getSize().y*0.5);
+    b->setOrigin(b->getTexture()->getSize().x * 0.5,
+                 b->getTexture()->getSize().y * 0.5);
+
+    //printf("bullet created!\n");
 
     gameObjects.push_back(b);
+}
+
+void GameWorld::destroy(GameObject *go)
+{
+    //find gameObject and destroys it
+    auto it = std::find(gameObjects.begin(), gameObjects.end(), go);
+    if (it != gameObjects.end())
+    {
+        delete *it;
+        gameObjects.erase(it);
+    }
+    else
+    {
+        printf("ERROR: trying to destroy a GO that doesn't exist\n");
+    }
 }
 
 void GameWorld::render(sf::RenderWindow &window)
@@ -113,10 +146,10 @@ void GameWorld::render(sf::RenderWindow &window)
         go->render(window);
 }
 
-void GameWorld::update()
+void GameWorld::update(sf::RenderWindow &window)
 {
     for (auto go : gameObjects)
-        go->update();
+        go->update(window);
 }
 
 void GameWorld::handleInput(sf::RenderWindow &window)

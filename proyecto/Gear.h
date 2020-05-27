@@ -1,5 +1,5 @@
-#ifndef BULLET_H_
-#define BULLET_H_
+#ifndef GEAR_H_
+#define GEAR_H_
 
 #include "GameObject.h"
 
@@ -9,14 +9,14 @@ namespace sf
     class Event;
 }; // namespace sf
 
-class Bullet : public GameObject
+class Gear : public GameObject
 {
 private:
     // info a serializar
 
 public:
-    Bullet(GameWorld *world);
-    virtual ~Bullet();
+    Gear(GameWorld *world);
+    virtual ~Gear();
 
     virtual void update(sf::RenderWindow &window);
 
@@ -28,4 +28,4 @@ public:
     int from_bin(char *data);
 };
 
-#endif /* BULLET_H_ */
+#endif /* GEAR_H_ */

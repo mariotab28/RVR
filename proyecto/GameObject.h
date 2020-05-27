@@ -50,7 +50,7 @@ public:
     virtual ~GameObject();
 
     virtual void render(sf::RenderWindow &window);
-    virtual void update();
+    virtual void update(sf::RenderWindow &window);
     virtual void handleInput(sf::Event &event);
 
     void setText(const std::string &text);

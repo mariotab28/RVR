@@ -1,7 +1,7 @@
 CC=g++
 CFLAGS=-g -I. -std=c++11
-DEPS = GameWorld.h GameObject.h Player.h Bullet.h
-OBJ = GameWorld.o GameObject.o Player.o Bullet.o
+DEPS = GameWorld.h GameObject.h Player.h Bullet.h Gear.h
+OBJ = GameWorld.o GameObject.o Player.o Bullet.o Gear.o
 LIBS=-lpthread -lsfml-graphics -lsfml-window -lsfml-system
 
 %.o: %.cc $(DEPS)

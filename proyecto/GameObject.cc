@@ -119,7 +119,7 @@ void GameObject::render(sf::RenderWindow &window)
         window.draw(*static_cast<sf::Sprite *>(entity));
 }
 
-void GameObject::update()
+void GameObject::update(sf::RenderWindow &window)
 {
     // pos + velocity
     x += dirX * speed;
