@@ -10,6 +10,7 @@
 
 GameWorld::GameWorld()
 {
+
 }
 
 GameWorld::~GameWorld()
@@ -25,7 +26,6 @@ GameWorld::~GameWorld()
 void GameWorld::init()
 {
     // TEST
-
     //event = new sf::Event();
 
     int highScore = 5;
@@ -46,8 +46,17 @@ void GameWorld::init()
 
     gameObjects.push_back(g);
 
+    Gear *g2 = new Gear(this);
+    g2->setTexture(*textures[3]);
+    g2->setScale(0.8, 0.8);
+    g2->setPosition(200, 500);
+    g2->setOrigin(g2->getTexture()->getSize().x * 0.5,
+                 g2->getTexture()->getSize().y * 0.5);
+
+    gameObjects.push_back(g2);
+
     // -----CREATE PLAYER------
-    Player *player = new Player(this);
+    player = new Player(this);
     player->setTexture(*textures[0]);
     player->setOrigin(player->getTexture()->getSize().x * 0.5,
                       player->getTexture()->getSize().y * 0.5);
@@ -56,6 +65,7 @@ void GameWorld::init()
 
     player->setPosition(200, 200);
     player->setScale(0.5f, 0.5f);
+    player->setId("Player");
 
     // ------CREATE TEXTS------
 
@@ -67,7 +77,16 @@ void GameWorld::init()
     text2->setPosition(20, 20);
     text2->setText("HIGH SCORE: " + std::to_string(highScore));
 
+    text = "P1 POINTS: " + std::to_string(player->getPoints());
 
+    playerText = createText(0, 20);
+    playerText->setPosition(20, 80);
+    playerText->setText(text);
+}
+
+std::vector<GameObject *> GameWorld::getGameObjects()
+{
+    return gameObjects;
 }
 
 GameObject *GameWorld::createSprite(int texture)
@@ -119,7 +138,7 @@ void GameWorld::createBullet(float posX, float posY, float angle)
     b->setRotation(angle);
     b->setOrigin(b->getTexture()->getSize().x * 0.5,
                  b->getTexture()->getSize().y * 0.5);
-
+    b->setId("Bullet");
     //printf("bullet created!\n");
 
     gameObjects.push_back(b);
@@ -138,6 +157,12 @@ void GameWorld::destroy(GameObject *go)
     {
         printf("ERROR: trying to destroy a GO that doesn't exist\n");
     }
+}
+
+void GameWorld::updateScores()
+{
+    text = "P1 POINTS: " + std::to_string(player->getPoints());
+    playerText->setText(text);
 }
 
 void GameWorld::render(sf::RenderWindow &window)

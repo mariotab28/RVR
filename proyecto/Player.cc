@@ -11,6 +11,9 @@ Player::Player(GameWorld *world) : GameObject(world, 1)
     gun->setScale(0.5, 0.5);
 
     incAngle = 0;
+    mouseX = 0;
+    mouseY = 0;
+    points = 0;
 }
 
 Player::~Player()
@@ -107,6 +110,16 @@ void Player::setGunTexture(sf::Texture &texture)
     gun->setTexture(texture);
     gun->setOrigin(gun->getTexture()->getSize().x * 0.3,
                    gun->getTexture()->getSize().y * 0.5);
+}
+
+void Player::setPoints(int points)
+{
+    this->points = points;
+}
+
+int Player::getPoints()
+{
+    return points;
 }
 
 void Player::to_bin()

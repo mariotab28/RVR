@@ -11,6 +11,7 @@ namespace sf
     class Event;
     class Texture;
     class Font;
+    class Sprite;
 }; // namespace sf
 class GameWorld;
 
@@ -33,7 +34,7 @@ protected:
 
     // info a serializar
     int type;
-    char *id;
+    std::string id;
 
     float x, y;
     float angle;
@@ -57,15 +58,18 @@ public:
     void setTexture(const sf::Texture &texture);
     const sf::Texture *getTexture();
     void setFont(const sf::Font &font);
-
+    void setId(const std::string& id);
     void setPosition(float x, float y);
     void setRotation(float angle);
-    float getRotation();
     void setScale(float factorX, float factorY);
     void setOrigin(float originX, float originY);
     void setDir(float dirX, float dirY);
-    //const std::pair<float, float> getDir();
     void setSpeed(float speed);
+
+    //const std::pair<float, float> getDir();
+    std::string getId();
+    float getRotation();
+    sf::Sprite* getSprite();
 
     void to_bin();
     int from_bin(char *data);

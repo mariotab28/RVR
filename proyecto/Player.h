@@ -18,6 +18,8 @@ private:
 
     float mouseX, mouseY;
 
+    int points;
+
     // info a serializar
 
 public:
@@ -30,6 +32,9 @@ public:
 
     void setGunTexture(sf::Texture &texture);
     void shoot();
+
+    void setPoints(int points);
+    int getPoints();
 
     void to_bin();
     int from_bin(char *data);

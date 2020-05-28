@@ -5,6 +5,7 @@
 #include <string>
 
 class GameObject;
+class Player;
 namespace sf
 {
     class RenderWindow;
@@ -23,6 +24,11 @@ private:
     std::vector<sf::Texture *> textures;
     std::vector<sf::Font *> fonts;
 
+    // test
+    Player *player;
+    std::string text;
+    GameObject *playerText;
+
 public:
     GameWorld();
     ~GameWorld();
@@ -32,11 +38,15 @@ public:
     GameObject *createSprite(int texture);
     GameObject *createText(int font, int characterSize);
 
+    std::vector<GameObject *> getGameObjects();
+
     bool loadTexture(const std::string &textureFilename);
     bool loadFont(const std::string &fontFilename);
 
     void createBullet(float posX, float posY, float angle);
     void destroy(GameObject* go);
+
+    void updateScores();
 
     void render(sf::RenderWindow &window);
     void update(sf::RenderWindow &window);

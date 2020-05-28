@@ -81,11 +81,6 @@ void GameObject::setRotation(float angle)
     entity->setRotation(angle);
 }
 
-float GameObject::getRotation()
-{
-    return angle;
-}
-
 void GameObject::setScale(float factorX, float factorY)
 {
     entity->setScale(factorX, factorY);
@@ -101,14 +96,41 @@ void GameObject::setDir(float dirX, float dirY)
     this->dirX = dirX;
     this->dirY = dirY;
 }
+
+void GameObject::setId(const std::string& id)
+{
+    this->id = id;
+}
+
 /*const std::pair<float, float> GameObject::getDir()
 {
     return std::pair<float, float>(dirX, dirY);
 }*/
 
+float GameObject::getRotation()
+{
+    return angle;
+}
+
 void GameObject::setSpeed(float speed)
 {
     this->speed = speed;
+}
+
+std::string GameObject::getId()
+{
+    return id;
+}
+
+sf::Sprite *GameObject::getSprite()
+{
+    if (type == 0)
+    {
+        //printf("ERROR: trying to getSprite from a non-sprite GO\n");
+        return nullptr;
+    }
+
+    return static_cast<sf::Sprite *>(entity);
 }
 
 void GameObject::render(sf::RenderWindow &window)
@@ -116,7 +138,10 @@ void GameObject::render(sf::RenderWindow &window)
     if (type == 0)
         window.draw(*static_cast<sf::Text *>(entity));
     else
+    {
         window.draw(*static_cast<sf::Sprite *>(entity));
+        //window.draw(*static_cast<sf::Sprite *>(entity)->getGlobalBounds());
+    }
 }
 
 void GameObject::update(sf::RenderWindow &window)
