@@ -12,6 +12,8 @@ namespace sf
 class Bullet : public GameObject
 {
 private:
+    //Player* owner;
+
     // info a serializar
 
 public:
@@ -19,6 +21,9 @@ public:
     virtual ~Bullet();
 
     virtual void update(sf::RenderWindow &window);
+
+    //void setOwner(Player* owner);
+    //Player* getOwner();
 
     /*virtual void render(sf::RenderWindow &window);
     virtual void update();

@@ -25,9 +25,8 @@ void Gear::update(sf::RenderWindow &window)
         sf::Sprite *playerSprite = (*it)->getSprite();
         if (mySprite != nullptr && playerSprite != nullptr &&
             mySprite->getGlobalBounds().intersects(playerSprite->getGlobalBounds())
-            && (*it)->getId() == "Player")
+            && (*it)->getId().compare(0,6,"Player") == 0)
         {
-            //printf("%s\n", (*it)->getId().c_str());
             static_cast<Player*>(*it)->setPoints(static_cast<Player*>(*it)->getPoints() + 1);
             world->updateScores();
             printf("gear recogido!\n");

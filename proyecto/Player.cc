@@ -4,6 +4,7 @@
 
 #include "GameWorld.h"
 #include <math.h>
+#include "Bullet.h"
 
 Player::Player(GameWorld *world) : GameObject(world, 1)
 {
@@ -44,7 +45,24 @@ void Player::update(sf::RenderWindow &window)
 
     gun->setRotation(atan2(mouseY - y, mouseX - x) * 180 / PI);
 
-    // pos + velocity
+    // check collision with a bullet--------------
+    std::vector<GameObject *> gameObjects = world->getGameObjects();
+
+    for (auto it = gameObjects.begin(); it != gameObjects.end(); ++it)
+    {
+        sf::Sprite *mySprite = getSprite();
+        sf::Sprite *bulletSprite = (*it)->getSprite();
+        if (mySprite != nullptr && bulletSprite != nullptr &&
+            mySprite->getGlobalBounds().intersects(bulletSprite->getGlobalBounds())
+            && (*it)->getId().compare(0, 6, "Bullet") == 0
+            && (*it)->getId().compare(6, 7, getId()) != 0)
+        {
+            printf("it->getid: %s getid: %s\n", (*it)->getId().c_str(), getId().c_str());
+
+            printf("player destruido!\n");
+            world->destroy(this);
+        }
+    }
 }
 
 void Player::handleInput(sf::Event &event)
@@ -92,7 +110,7 @@ void Player::shoot()
 
         world->createBullet(x + cosf(gunAngle * PI / 180) * 100,
                             y + sinf(gunAngle * PI / 180) * 100,
-                            gunAngle);
+                            gunAngle, getId());
     }
     /*
     

@@ -26,6 +26,7 @@ private:
 
     // test
     Player *player;
+    Player *player2;
     std::string text;
     GameObject *playerText;
 
@@ -43,7 +44,7 @@ public:
     bool loadTexture(const std::string &textureFilename);
     bool loadFont(const std::string &fontFilename);
 
-    void createBullet(float posX, float posY, float angle);
+    void createBullet(float posX, float posY, float angle, std::string ownerId);
     void destroy(GameObject* go);
 
     void updateScores();

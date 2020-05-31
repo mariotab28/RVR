@@ -20,6 +20,16 @@ void Bullet::update(sf::RenderWindow &window)
         world->destroy(this);
 }
 
+/*void Bullet::setOwner(Player *owner)
+{
+    this->owner = owner; 
+}
+
+Player *Bullet::getOwner()
+{
+    return owner;
+}*/
+
 void Bullet::to_bin()
 {
 }

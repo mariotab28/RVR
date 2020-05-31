@@ -35,7 +35,7 @@ void GameWorld::init()
     tank1->setScale(0.5f, 0.5f);*/
     //tank1->setOrigin();
 
-    // TEST GEARS
+    // TEST GEARS-------
 
     Gear *g = new Gear(this);
     g->setTexture(*textures[3]);
@@ -65,7 +65,20 @@ void GameWorld::init()
 
     player->setPosition(200, 200);
     player->setScale(0.5f, 0.5f);
-    player->setId("Player");
+    player->setId("Player1");
+
+    // PLAYER 2 TO TEST DEATH-----
+
+    player2 = new Player(this);
+    player2->setTexture(*textures[0]);
+    player2->setOrigin(player2->getTexture()->getSize().x * 0.5,
+                      player2->getTexture()->getSize().y * 0.5);
+    player2->setGunTexture(*textures[1]);
+    gameObjects.push_back(player2);
+
+    player2->setPosition(500, 200);
+    player2->setScale(0.5f, 0.5f);
+    player2->setId("Player2");
 
     // ------CREATE TEXTS------
 
@@ -128,7 +141,7 @@ bool GameWorld::loadFont(const std::string &fontFilename)
     return true;
 }
 
-void GameWorld::createBullet(float posX, float posY, float angle)
+void GameWorld::createBullet(float posX, float posY, float angle, std::string ownerId)
 {
     Bullet *b = new Bullet(this);
     b->setTexture(*textures[2]);
@@ -138,7 +151,9 @@ void GameWorld::createBullet(float posX, float posY, float angle)
     b->setRotation(angle);
     b->setOrigin(b->getTexture()->getSize().x * 0.5,
                  b->getTexture()->getSize().y * 0.5);
-    b->setId("Bullet");
+    b->setId("Bullet" + ownerId);
+    printf("Bullet%s\n", ownerId.c_str());
+    //b->setOwner(owner);
     //printf("bullet created!\n");
 
     gameObjects.push_back(b);
