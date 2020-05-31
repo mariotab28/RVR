@@ -17,6 +17,9 @@ class GameWorld;
 
 class GameObject : public Serializable
 {
+static const size_t MESSAGE_SIZE =
+ sizeof(uint8_t) + sizeof(char)*20 + sizeof(float)*3;
+
 private:
     sf::Transformable *entity;
 
@@ -33,8 +36,8 @@ protected:
     const float PI = 3.14159265359;
 
     // info a serializar
-    int type;
-    std::string id;
+    uint8_t type;
+    std::string id; // max 20
 
     float x, y;
     float angle;

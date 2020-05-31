@@ -3,6 +3,9 @@
 #include <SFML/Graphics.hpp>
 
 #include <math.h>
+#include <unistd.h>
+#include <vector>
+#include <string.h>
 
 GameObject::GameObject(GameWorld *world, int type)
     : Serializable(), world(world), type(type)
@@ -168,9 +171,67 @@ void GameObject::handleInput(sf::Event &event)
 
 void GameObject::to_bin()
 {
+    alloc_data(MESSAGE_SIZE);
+
+    memset(_data, 0, MESSAGE_SIZE);
+
+    // serializar type
+    memcpy(_data, static_cast<void*>(&type), sizeof(uint8_t));
+    _data += sizeof(uint8_t);
+
+    // serializar id
+    memcpy(_data, static_cast<void*>((char*)id.c_str()), 20*sizeof(char));
+    _data += 20*sizeof(char);
+
+    // serializar x
+    memcpy(_data, static_cast<void*>(&x), sizeof(float));
+    _data += sizeof(float);
+
+    // serializar y
+    memcpy(_data, static_cast<void*>(&y), sizeof(float));
+    _data += sizeof(float);
+
+    // serializar angle
+    memcpy(_data, static_cast<void*>(&angle), sizeof(float));
+    _data += sizeof(float);
+
+    // colocamos el puntero al inicio del fichero
+    _data -= MESSAGE_SIZE;
 }
 
 int GameObject::from_bin(char *data)
 {
-    return 0;
+    try
+    {
+        // deserializamos type
+        memcpy(static_cast<void*>(&type), data, sizeof(uint8_t));
+        data += sizeof(uint8_t);
+
+        // deserializamos id
+        char auxId[20];
+        memcpy(static_cast<void*>(&id), data, 20*sizeof(char));
+        data += 20*sizeof(char);
+        auxId[20] = '\0';
+        id = auxId;
+
+        // deserializamos x
+        memcpy(static_cast<void*>(&x), data, sizeof(float));
+        data += sizeof(float);
+
+        // deserializamos y
+        memcpy(static_cast<void*>(&y), data, sizeof(float));
+        data += sizeof(float);
+
+        // deserializamos angle
+        memcpy(static_cast<void*>(&angle), data, sizeof(float));
+        data += sizeof(float);
+
+        data -= MESSAGE_SIZE;
+
+        return 0;
+    }
+    catch(const std::exception& e)
+    {
+        return -1;
+    }
 }
