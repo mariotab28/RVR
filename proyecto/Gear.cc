@@ -38,9 +38,21 @@ void Gear::update(sf::RenderWindow &window)
 
 void Gear::to_bin()
 {
+    GameObject::to_bin();
+
+
 }
 
 int Gear::from_bin(char *data)
 {
-    return 0;
+    try
+    {
+        GameObject::from_bin(data);
+
+        return 0;
+    }
+    catch(const std::exception& e)
+    {
+        return -1;
+    }
 }

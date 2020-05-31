@@ -3,8 +3,6 @@
 #include <SFML/Graphics.hpp>
 
 #include <math.h>
-#include <unistd.h>
-#include <vector>
 #include <string.h>
 
 GameObject::GameObject(GameWorld *world, int type)
@@ -196,7 +194,7 @@ void GameObject::to_bin()
     _data += sizeof(float);
 
     // colocamos el puntero al inicio del fichero
-    _data -= MESSAGE_SIZE;
+    //_data -= MESSAGE_SIZE;
 }
 
 int GameObject::from_bin(char *data)
@@ -226,7 +224,7 @@ int GameObject::from_bin(char *data)
         memcpy(static_cast<void*>(&angle), data, sizeof(float));
         data += sizeof(float);
 
-        data -= MESSAGE_SIZE;
+        //data -= MESSAGE_SIZE;
 
         return 0;
     }

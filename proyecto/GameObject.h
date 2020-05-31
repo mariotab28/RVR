@@ -17,9 +17,6 @@ class GameWorld;
 
 class GameObject : public Serializable
 {
-static const size_t MESSAGE_SIZE =
- sizeof(uint8_t) + sizeof(char)*20 + sizeof(float)*3;
-
 private:
     sf::Transformable *entity;
 
@@ -50,6 +47,9 @@ protected:
     GameWorld *world;
 
 public:
+    size_t MESSAGE_SIZE =
+        sizeof(uint8_t) + sizeof(char)*20 + sizeof(float)*3;
+
     GameObject(GameWorld *world, int type);
     virtual ~GameObject();
 

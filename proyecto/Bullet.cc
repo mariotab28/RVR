@@ -20,21 +20,24 @@ void Bullet::update(sf::RenderWindow &window)
         world->destroy(this);
 }
 
-/*void Bullet::setOwner(Player *owner)
-{
-    this->owner = owner; 
-}
-
-Player *Bullet::getOwner()
-{
-    return owner;
-}*/
-
 void Bullet::to_bin()
 {
+    GameObject::to_bin();
+
+
 }
 
 int Bullet::from_bin(char *data)
 {
-    return 0;
+    try
+    {
+        GameObject::from_bin(data);
+
+        return 0;
+    }
+    catch(const std::exception& e)
+    {
+        return -1;
+    }
 }
+

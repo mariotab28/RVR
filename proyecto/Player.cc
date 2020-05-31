@@ -1,15 +1,18 @@
 #include "Player.h"
 
 #include <SFML/Graphics.hpp>
+#include <math.h>
+#include <string.h>
 
 #include "GameWorld.h"
-#include <math.h>
 #include "Bullet.h"
 
 Player::Player(GameWorld *world) : GameObject(world, 1)
 {
     gun = new GameObject(world, 1);
     gun->setScale(0.5, 0.5);
+
+    MESSAGE_SIZE += sizeof(uint8_t);
 
     incAngle = 0;
     mouseX = 0;
@@ -114,6 +117,7 @@ void Player::shoot()
     }
     /*
     
+    // TODO: ???
     // coger del pool de balas
     // si no hay ninguna desactivada, se crea una nueva
     // EL VECTOR DE BALAS TIENE QUE TENERLO EL GAMEWORLD
@@ -142,9 +146,27 @@ int Player::getPoints()
 
 void Player::to_bin()
 {
+    GameObject::to_bin();
+
+    // serializar points
+    memcpy(_data, static_cast<void*>(&points), sizeof(uint8_t));
+    _data += sizeof(uint8_t);
 }
 
 int Player::from_bin(char *data)
 {
-    return 0;
+    try
+    {
+        GameObject::from_bin(data);
+
+        // deserializamos points
+        memcpy(static_cast<void*>(&points), data, sizeof(uint8_t));
+        data += sizeof(uint8_t);
+
+        return 0;
+    }
+    catch(const std::exception& e)
+    {
+        return -1;
+    }
 }

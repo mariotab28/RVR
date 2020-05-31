@@ -15,12 +15,10 @@ private:
     GameObject *gun;
 
     float incAngle;
-
     float mouseX, mouseY;
 
-    int points;
-
     // info a serializar
+    uint8_t points;
 
 public:
     Player(GameWorld* world);
