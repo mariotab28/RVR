@@ -10,7 +10,6 @@
 
 GameWorld::GameWorld()
 {
-
 }
 
 GameWorld::~GameWorld()
@@ -25,15 +24,8 @@ GameWorld::~GameWorld()
 
 void GameWorld::init()
 {
-    // TEST
-    //event = new sf::Event();
-
+    // leer el highscore de un archivo!!!!
     int highScore = 5;
-
-    /*GameObject *tank1 = world.createSprite(0);
-    tank1->setPosition(200, 200);
-    tank1->setScale(0.5f, 0.5f);*/
-    //tank1->setOrigin();
 
     // TEST GEARS-------
 
@@ -51,7 +43,7 @@ void GameWorld::init()
     g2->setScale(0.8, 0.8);
     g2->setPosition(200, 500);
     g2->setOrigin(g2->getTexture()->getSize().x * 0.5,
-                 g2->getTexture()->getSize().y * 0.5);
+                  g2->getTexture()->getSize().y * 0.5);
 
     gameObjects.push_back(g2);
 
@@ -72,7 +64,7 @@ void GameWorld::init()
     player2 = new Player(this);
     player2->setTexture(*textures[0]);
     player2->setOrigin(player2->getTexture()->getSize().x * 0.5,
-                      player2->getTexture()->getSize().y * 0.5);
+                       player2->getTexture()->getSize().y * 0.5);
     player2->setGunTexture(*textures[1]);
     gameObjects.push_back(player2);
 
@@ -152,9 +144,7 @@ void GameWorld::createBullet(float posX, float posY, float angle, std::string ow
     b->setOrigin(b->getTexture()->getSize().x * 0.5,
                  b->getTexture()->getSize().y * 0.5);
     b->setId("Bullet" + ownerId);
-    printf("Bullet%s\n", ownerId.c_str());
-    //b->setOwner(owner);
-    //printf("bullet created!\n");
+    //printf("Bullet%s\n", ownerId.c_str());
 
     gameObjects.push_back(b);
 }
@@ -180,6 +170,25 @@ void GameWorld::updateScores()
     playerText->setText(text);
 }
 
+void GameWorld::createGear(const sf::RenderWindow &window)
+{
+    Gear *g = new Gear(this);
+    g->setTexture(*textures[3]);
+    g->setScale(0.8, 0.8);
+    g->setOrigin(g->getTexture()->getSize().x * 0.5,
+                 g->getTexture()->getSize().y * 0.5);
+
+    g->setPosition(rand() % window.getSize().x, rand() % window.getSize().y);
+
+    // TODO: SI EL GEAR SE CREA EN UNA POSICION
+    // DONDE YA HAY ALGO SE VUELVE A HACER EL RANDOM
+    /*sf::Sprite *mySprite = getSprite();
+    sf::Sprite *otherSprite = (*it)->getSprite();
+    if(mySprite->getGlobalBounds().intersects(otherSprite->getGlobalBounds())*/
+
+    gameObjects.push_back(g);
+}
+
 void GameWorld::render(sf::RenderWindow &window)
 {
     for (auto go : gameObjects)
@@ -198,7 +207,7 @@ void GameWorld::handleInput(sf::RenderWindow &window)
     {
         if (event->type == sf::Event::Closed)
             window.close();
-        else //if (event.type == sf::Event::KeyPressed)
+        else
         {
             for (auto go : gameObjects)
                 go->handleInput(*event);

@@ -49,6 +49,8 @@ public:
 
     void updateScores();
 
+    void createGear(const sf::RenderWindow& window);
+
     void render(sf::RenderWindow &window);
     void update(sf::RenderWindow &window);
     void handleInput(sf::RenderWindow &window);

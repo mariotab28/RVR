@@ -7,6 +7,14 @@
 GameObject::GameObject(GameWorld *world, int type)
     : Serializable(), world(world), type(type)
 {
+    id = "";
+    x = 0;
+    y = 0;
+    angle = 0;
+    speed = 0;
+    dirX = 0;
+    dirY = 0;
+
     switch (type)
     {
     case 0: // TEXT GAMEOBJECT
@@ -25,8 +33,6 @@ GameObject::GameObject(GameWorld *world, int type)
         break;
     }
     }
-
-    angle = 0;
 }
 
 GameObject::~GameObject()
@@ -97,7 +103,7 @@ void GameObject::setDir(float dirX, float dirY)
     this->dirY = dirY;
 }
 
-void GameObject::setId(const std::string& id)
+void GameObject::setId(const std::string &id)
 {
     this->id = id;
 }
