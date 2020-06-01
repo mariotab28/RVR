@@ -1,6 +1,5 @@
 //#include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
-//#include <SFML/Graphics/Rect.hpp>
 
 #include "GameWorld.h"
 

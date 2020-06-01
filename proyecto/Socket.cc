@@ -39,7 +39,7 @@ int Socket::recv(Serializable &obj, Socket * &sock)
 
     ssize_t bytes = ::recvfrom(sd, buffer, MAX_MESSAGE_SIZE, 0, &sa, &sa_len);
 
-    std:: cout << "bytes: " << bytes << "\n";
+    //std:: cout << "bytes: " << bytes << "\n";
 
     if ( bytes < 0 )
     {

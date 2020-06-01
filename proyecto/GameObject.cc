@@ -19,7 +19,7 @@ GameObject::GameObject(GameWorld *world, int goType)
     dirX = 0;
     dirY = 0;
 
-    switch (type)
+    switch (goType)
     {
     case 0: // TEXT GAMEOBJECT
     {
@@ -145,6 +145,7 @@ sf::Sprite *GameObject::getSprite()
 
 void GameObject::render(sf::RenderWindow &window)
 {
+    //std::cout << "goType: " << std::to_string(goType) << "\n";
     if (goType == 0)
         window.draw(*static_cast<sf::Text *>(entity));
     else
@@ -197,7 +198,7 @@ void GameObject::to_bin()
     _data += sizeof(float);
 
     // colocamos el puntero al inicio del fichero
-    //_data -= MESSAGE_SIZE;
+    _data -= MESSAGE_SIZE;
 }
 
 int GameObject::from_bin(char *data)
@@ -227,7 +228,7 @@ int GameObject::from_bin(char *data)
         memcpy(static_cast<void*>(&angle), data, sizeof(float));
         data += sizeof(float);
 
-        //data -= MESSAGE_SIZE;
+        data -= MESSAGE_SIZE;
 
         return 0;
     }

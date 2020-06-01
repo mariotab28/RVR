@@ -6,6 +6,15 @@
 #include "Serializable.h"
 #include "Socket.h"
 
+namespace sf
+{
+    class RenderWindow;
+    class Event;
+    class Color;
+}; // namespace sf
+
+class GameWorld;
+
 class BTMessage : public Serializable
 {
 public:
@@ -29,6 +38,8 @@ public:
     uint8_t type;
     std::string nick; // max. 8
 };
+
+// --------------------------------------------------------------------
 
 class BTServer
 {
@@ -54,13 +65,21 @@ public:
     BTClient(const char *s, const char *p, const char *n) : socket(s, p),
                                                             nick(n){};
 
+    void start();
+
     void login();
     void logout();
 
     void input_thread();
     void net_thread();
+    void render_thread();
 
 private:
+    sf::RenderWindow* window;
+    sf::Color* bg;
+
+    GameWorld* world;
+
     Socket socket;
     std::string nick;
 };

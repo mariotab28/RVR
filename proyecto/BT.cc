@@ -1,5 +1,8 @@
 #include "BT.h"
 
+#include <SFML/Graphics.hpp>
+#include "GameWorld.h"
+
 void BTMessage::to_bin()
 {
     alloc_data(MESSAGE_SIZE);
@@ -22,7 +25,7 @@ int BTMessage::from_bin(char *data)
 {
     try
     {
-        std::cout << "frombin\n";
+        //std::cout << "frombin\n";
 
         // deserializamos type
         memcpy(static_cast<void *>(&type), data, sizeof(uint8_t));
@@ -37,7 +40,7 @@ int BTMessage::from_bin(char *data)
 
         data -= MESSAGE_SIZE;
 
-        std::cout << "frombin finished\n";
+        //std::cout << "frombin finished\n";
 
         return 0;
     }
@@ -122,6 +125,33 @@ void BTServer::do_messages()
 
 // --------------------------------------------------------------------
 
+void BTClient::start()
+{
+    // ----WINDOW CREATION-----
+    window = new sf::RenderWindow(sf::VideoMode(800, 600), "Window title");
+    window->setTitle("Bouncy Tanks - CLIENT");
+    // background color
+    bg = new sf::Color(180, 180, 180); //grey
+
+    // ----LOAD RESOURCES-----
+    
+    world = new GameWorld();
+
+    printf("world created\n");
+
+    world->loadTexture("assets/tankBase.png");
+    world->loadTexture("assets/tankGun.png");
+    world->loadTexture("assets/bullet.png");
+    world->loadTexture("assets/gear.png");
+
+
+    world->loadFont("assets/arial.ttf");
+
+    // ----INIT WORLD (READ MAP)---
+
+    world->init();
+}
+
 void BTClient::login()
 {
     std::cout << "BTCLIENT::LOGIN\n";
@@ -174,4 +204,29 @@ void BTClient::net_thread()
 
         //std::cout << msg.nick.c_str() << ": " << msg.message.c_str() << "\n";
     }
+}
+
+void BTClient::render_thread()
+{
+    while (window->isOpen())
+    {
+        // Clear screen
+        window->clear(*bg);
+
+        // Render
+        world->handleInput(*window); // TODO: ESTO DEBE IR EN INPUT_THREAD!
+        world->update(*window);
+        world->render(*window);
+
+        // Update the window
+        window->display();
+    }
+
+    // TODO: METER ESTO EN METODO END() -------
+
+    delete bg;
+    delete window;
+    delete world;
+
+    // ----------------------------------------
 }
