@@ -6,36 +6,34 @@
 #include "Serializable.h"
 #include "Socket.h"
 
-class BTMessage: public Serializable
+class BTMessage : public Serializable
 {
 public:
-    static const size_t MESSAGE_SIZE = sizeof(char) * 88 + sizeof(uint8_t);
+    size_t MESSAGE_SIZE = sizeof(char) * 8 + sizeof(uint8_t);
 
     enum MessageType
     {
-        LOGIN   = 0,
+        LOGIN = 0,
         OBJECT = 1,
-        LOGOUT  = 2
+        LOGOUT = 2
     };
 
     BTMessage(){};
 
-    BTMessage(const std::string& n, const std::string& m):nick(n),message(m){};
+    BTMessage(const std::string &n) : nick(n){};
 
-    void to_bin(){};
+    virtual void to_bin();
 
-    int from_bin(char * bobj){};
+    virtual int from_bin(char *data);
 
     uint8_t type;
-
-    std::string nick;
-    std::string message;
+    std::string nick; // max. 8
 };
 
 class BTServer
 {
 public:
-    BTServer(const char * s, const char * p): socket(s, p)
+    BTServer(const char *s, const char *p) : socket(s, p)
     {
         socket.bind();
     };
@@ -53,8 +51,8 @@ private:
 class BTClient
 {
 public:
-    BTClient(const char * s, const char * p, const char * n):socket(s, p),
-        nick(n){};
+    BTClient(const char *s, const char *p, const char *n) : socket(s, p),
+                                                            nick(n){};
 
     void login();
     void logout();
@@ -66,4 +64,3 @@ private:
     Socket socket;
     std::string nick;
 };
-

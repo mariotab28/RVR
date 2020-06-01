@@ -5,9 +5,12 @@
 #include <math.h>
 #include <string.h>
 
+// TODO: PONER EL NICK AL QUE PERTENECE EL GAMEOBJECT
 GameObject::GameObject(GameWorld *world, int goType)
-    : Serializable(), world(world), goType(goType)
+    : BTMessage(""), world(world), goType(goType)
 {
+    MESSAGE_SIZE += sizeof(uint8_t) + sizeof(char)*20 + sizeof(float)*3;
+
     id = "";
     x = 0;
     y = 0;

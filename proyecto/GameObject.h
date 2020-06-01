@@ -20,9 +20,6 @@ class GameObject : public BTMessage
 private:
     sf::Transformable *entity;
 
-    //sf::Texture *texture;
-    //sf::Font *font;
-
     /*enum TYPE
     {
         TEXT,
@@ -47,8 +44,8 @@ protected:
     GameWorld *world;
 
 public:
-    size_t MESSAGE_SIZE =
-        sizeof(uint8_t) + sizeof(char)*20 + sizeof(float)*3;
+    /*size_t MESSAGE_SIZE =
+        sizeof(uint8_t) + sizeof(char)*20 + sizeof(float)*3;*/
 
     GameObject(GameWorld *world, int goType);
     virtual ~GameObject();
