@@ -1,7 +1,7 @@
 #ifndef GAMEOBJECT_H_
 #define GAMEOBJECT_H_
 
-#include "Serializable.h"
+#include "BT.h"
 #include <string>
 
 namespace sf
@@ -15,7 +15,7 @@ namespace sf
 }; // namespace sf
 class GameWorld;
 
-class GameObject : public Serializable
+class GameObject : public BTMessage
 {
 private:
     sf::Transformable *entity;
@@ -33,7 +33,7 @@ protected:
     const float PI = 3.14159265359;
 
     // info a serializar
-    uint8_t type;
+    uint8_t goType;
     std::string id; // max 20
 
     float x, y;
@@ -50,7 +50,7 @@ public:
     size_t MESSAGE_SIZE =
         sizeof(uint8_t) + sizeof(char)*20 + sizeof(float)*3;
 
-    GameObject(GameWorld *world, int type);
+    GameObject(GameWorld *world, int goType);
     virtual ~GameObject();
 
     virtual void render(sf::RenderWindow &window);

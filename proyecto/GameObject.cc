@@ -5,8 +5,8 @@
 #include <math.h>
 #include <string.h>
 
-GameObject::GameObject(GameWorld *world, int type)
-    : Serializable(), world(world), type(type)
+GameObject::GameObject(GameWorld *world, int goType)
+    : Serializable(), world(world), goType(goType)
 {
     id = "";
     x = 0;
@@ -44,7 +44,7 @@ GameObject::~GameObject()
 
 void GameObject::setText(const std::string &text)
 {
-    if (type == 0)
+    if (goType == 0)
         static_cast<sf::Text *>(entity)->setString(text);
     else
         printf("ERROR: trying to setText to a non-text GO\n");
@@ -52,7 +52,7 @@ void GameObject::setText(const std::string &text)
 
 void GameObject::setTexture(const sf::Texture &texture)
 {
-    if (type == 1)
+    if (goType == 1)
         static_cast<sf::Sprite *>(entity)->setTexture(texture);
     else
         printf("ERROR: trying to setTexture to a non-sprite GO\n");
@@ -60,7 +60,7 @@ void GameObject::setTexture(const sf::Texture &texture)
 
 const sf::Texture *GameObject::getTexture()
 {
-    if (type == 1)
+    if (goType == 1)
         return static_cast<sf::Sprite *>(entity)->getTexture();
     else
         printf("ERROR: trying to getTexture from a non-sprite GO\n");
@@ -69,7 +69,7 @@ const sf::Texture *GameObject::getTexture()
 
 void GameObject::setFont(const sf::Font &font)
 {
-    if (type == 0)
+    if (goType == 0)
         static_cast<sf::Text *>(entity)->setFont(font);
     else
         printf("ERROR: trying to setFont to a non-text GO\n");
@@ -131,7 +131,7 @@ std::string GameObject::getId()
 
 sf::Sprite *GameObject::getSprite()
 {
-    if (type == 0)
+    if (goType == 0)
     {
         //printf("ERROR: trying to getSprite from a non-sprite GO\n");
         return nullptr;
@@ -142,7 +142,7 @@ sf::Sprite *GameObject::getSprite()
 
 void GameObject::render(sf::RenderWindow &window)
 {
-    if (type == 0)
+    if (goType == 0)
         window.draw(*static_cast<sf::Text *>(entity));
     else
     {
@@ -173,8 +173,8 @@ void GameObject::to_bin()
 
     memset(_data, 0, MESSAGE_SIZE);
 
-    // serializar type
-    memcpy(_data, static_cast<void*>(&type), sizeof(uint8_t));
+    // serializar goType
+    memcpy(_data, static_cast<void*>(&goType), sizeof(uint8_t));
     _data += sizeof(uint8_t);
 
     // serializar id
@@ -201,8 +201,8 @@ int GameObject::from_bin(char *data)
 {
     try
     {
-        // deserializamos type
-        memcpy(static_cast<void*>(&type), data, sizeof(uint8_t));
+        // deserializamos goType
+        memcpy(static_cast<void*>(&goType), data, sizeof(uint8_t));
         data += sizeof(uint8_t);
 
         // deserializamos id
