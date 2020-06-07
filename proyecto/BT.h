@@ -49,9 +49,17 @@ public:
         socket.bind();
     };
 
+    void start();
+
     void do_messages();
+    void simulate();
 
 private:
+    // TODO: ELIMINAR VENTANA DEL SERVER!!!!
+    sf::RenderWindow* window;
+    sf::Color* bg;
+    GameWorld* world;
+
     std::vector<Socket *> clients;
     Socket socket;
 };
@@ -72,7 +80,7 @@ public:
 
     void input_thread();
     void net_thread();
-    void render_thread();
+    //void render_thread();
 
 private:
     sf::RenderWindow* window;

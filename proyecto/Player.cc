@@ -31,7 +31,8 @@ void Player::render(sf::RenderWindow &window)
     GameObject::render(window);
 
     gun->render(window);
-
+    
+    // TODO: ESTO DA ERROR CUANDO SE CIERRA LA VENTANA!!
     mouseX = sf::Mouse::getPosition(window).x;
     mouseY = sf::Mouse::getPosition(window).y;
 }
@@ -100,6 +101,7 @@ void Player::handleInput(sf::Event &event)
 
     if (event.type == sf::Event::MouseButtonPressed)
     {
+        printf("shoot!\n");
         shoot();
     }
 }

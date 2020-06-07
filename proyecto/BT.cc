@@ -52,6 +52,33 @@ int BTMessage::from_bin(char *data)
 
 // -------------------------------------------------------------------------
 
+void BTServer::start()
+{
+    // ----WINDOW CREATION-----
+    /*window = new sf::RenderWindow(sf::VideoMode(800, 600), "Window title");
+    window->setTitle("Bouncy Tanks - SERVER");
+    // background color
+    bg = new sf::Color(180, 180, 180); //grey*/
+
+    // ----LOAD RESOURCES-----
+    
+    world = new GameWorld();
+
+    printf("world created\n");
+
+    world->loadTexture("assets/tankBase.png");
+    world->loadTexture("assets/tankGun.png");
+    world->loadTexture("assets/bullet.png");
+    world->loadTexture("assets/gear.png");
+
+
+    world->loadFont("assets/arial.ttf");
+
+    // ----INIT WORLD (READ MAP)---
+
+    world->init();
+}
+
 void BTServer::do_messages()
 {
     while (true)
@@ -63,23 +90,32 @@ void BTServer::do_messages()
 
         //std::cout << "domessages\n";
 
-        Socket *client;
+        Socket *client = &socket;
         BTMessage message;
 
         if (socket.recv(message, client) == -1)
         {
             std::cout << "ERROR recv -1\n";
         }
-        std::to_string(message.type);
+        //std::to_string(message.type);
         //std::cout << "type: " << std::to_string(message.type) << "\n";
-
+        //std::cout << *client << "\n";
         switch (message.type)
         {
         case BTMessage::LOGIN:
         {
             std::cout << "LOGIN " << *client << "\n";
-            // añadir el client al vector clients
-            clients.push_back(client);
+            //std::cout << "LOGIN\n";
+            if(client == nullptr)
+            {
+                printf("ERROR: Trying to login a nullptr client\n");
+            }
+            else
+            {    
+                // añadir el client al vector clients
+                clients.push_back(client);
+            }
+
             break;
         }
         case BTMessage::LOGOUT:
@@ -102,7 +138,7 @@ void BTServer::do_messages()
         {
             // comprobar que el client este logeado (i.e. este en el vector
             // clients)
-            std::cout << "MESSAGE " << *client << "\n";
+            /*std::cout << "MESSAGE " << *client << "\n";
             for (auto it = clients.begin(); it != clients.end(); ++it)
             {
                 if (!(*(*it) == *client))
@@ -110,7 +146,7 @@ void BTServer::do_messages()
                     std::cout << "ENVIANDO A " << *(*it) << "\n";
                     socket.send(message, *(*it));
                 }
-            }
+            }*/
 
             break;
         }
@@ -123,15 +159,40 @@ void BTServer::do_messages()
     }
 }
 
+void BTServer::simulate()
+{
+    while (true)
+    {
+        // UPDATE WORLD
+        BTMessage msg;
+        msg.type = BTMessage::OBJECT;
+
+
+        // SEND ALL WORLD
+
+
+
+        //std::cout << "MESSAGE \n";
+        for (auto it = clients.begin(); it != clients.end(); ++it)
+        {
+            //std::cout << "ENVIANDO A " << *(*it) << "\n";
+            socket.send(msg, *(*it));
+        }
+    }
+}
+
+
 // --------------------------------------------------------------------
 
 void BTClient::start()
 {
     // ----WINDOW CREATION-----
-    window = new sf::RenderWindow(sf::VideoMode(800, 600), "Window title");
+    window = new sf::RenderWindow(sf::VideoMode(800, 600, 16), "Window title");
     window->setTitle("Bouncy Tanks - CLIENT");
     // background color
     bg = new sf::Color(180, 180, 180); //grey
+
+    window->setActive(false);
 
     // ----LOAD RESOURCES-----
     
@@ -164,6 +225,8 @@ void BTClient::login()
 
 void BTClient::logout()
 {
+    std::cout << "BTCLIENT::LOGOUT\n";
+
     BTMessage em(nick);
     em.type = BTMessage::LOGOUT;
 
@@ -172,21 +235,31 @@ void BTClient::logout()
 
 void BTClient::input_thread()
 {
-    while (true)
+    printf("main_thread\n");
+
+    while (window->isOpen())
     {
+        // HANDLE INPUT
+        world->handleInput(*window);
+
+
+        // SEND INPUT MESSAGES TO SERVER
+
+        //printf("a");
+
         // Leer stdin con std::getline
         // Enviar al servidor usando socket
-        std::string msg;
+        /*std::string msg;
         std::getline(std::cin, msg);
 
         // Si el cliente pulsa 'q' cierra su conexión
         if (msg == "q")
-            break;
+            break;*/
 
-        BTMessage em(nick);
+        /*BTMessage em(nick);
         em.type = BTMessage::OBJECT;
 
-        socket.send(em, socket);
+        socket.send(em, socket);*/
     }
 
     logout();
@@ -194,19 +267,41 @@ void BTClient::input_thread()
 
 void BTClient::net_thread()
 {
-    while (true)
+    printf("net_thread\n");
+
+    while (window->isOpen())
     {
+        // RECEIVE WORLD
+
         //Recibir Mensajes de red
         //Mostrar en pantalla el mensaje de la forma "nick: mensaje"
         BTMessage msg;
+        if (socket.recv(msg) != -1)
+        {
+            std::to_string(msg.type);
+        }
 
-        socket.recv(msg);
+        // RENDER WORLD
+        //printf("a");    
+        // Clear screen
+        window->clear(*bg);
 
-        //std::cout << msg.nick.c_str() << ": " << msg.message.c_str() << "\n";
+        // Render
+        world->update(*window);
+        world->render(*window);
+
+        // Update the window
+        window->display();
     }
+
+    // TODO: METER ESTO EN METODO END() -------
+
+    /*delete bg;
+    delete window;
+    delete world;*/
 }
 
-void BTClient::render_thread()
+/*void BTClient::render_thread()
 {
     while (window->isOpen())
     {
@@ -214,8 +309,7 @@ void BTClient::render_thread()
         window->clear(*bg);
 
         // Render
-        world->handleInput(*window); // TODO: ESTO DEBE IR EN INPUT_THREAD!
-        world->update(*window);
+        //world->update(*window);
         world->render(*window);
 
         // Update the window
@@ -229,4 +323,4 @@ void BTClient::render_thread()
     delete world;
 
     // ----------------------------------------
-}
+}*/
