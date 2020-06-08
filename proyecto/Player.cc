@@ -148,11 +148,24 @@ int Player::getPoints()
 
 void Player::to_bin()
 {
-    GameObject::to_bin();
+    //GameObject::to_bin();
+
+    printf("player tobin\n");
+
+    alloc_data(MESSAGE_SIZE);
+
+    memset(_data, 0, MESSAGE_SIZE);
+
+    std::cout << "points: " << std::to_string(points) << "\n";
 
     // serializar points
     memcpy(_data, static_cast<void*>(&points), sizeof(uint8_t));
     _data += sizeof(uint8_t);
+
+    //std::cout << "data: " << _data << "\n";
+    printf("%s", _data);
+    // colocamos el puntero al inicio del fichero
+    //_data -= MESSAGE_SIZE;
 }
 
 int Player::from_bin(char *data)

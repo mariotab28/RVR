@@ -161,16 +161,20 @@ void BTServer::do_messages()
 
 void BTServer::simulate()
 {
+    
+
     while (true)
     {
         // UPDATE WORLD
-        BTMessage msg;
-        msg.type = BTMessage::OBJECT;
+        world->update(*window);
 
 
         // SEND ALL WORLD
+        BTMessage msg;
+        msg.type = BTMessage::OBJECT;
+        //std::cout << world->serializate() << "\n";
 
-
+        world->serializate();
 
         //std::cout << "MESSAGE \n";
         for (auto it = clients.begin(); it != clients.end(); ++it)
@@ -240,12 +244,13 @@ void BTClient::input_thread()
     while (window->isOpen())
     {
         // HANDLE INPUT
+        //printf("a\n");
         world->handleInput(*window);
 
 
         // SEND INPUT MESSAGES TO SERVER
 
-        //printf("a");
+        //printf("a\n");
 
         // Leer stdin con std::getline
         // Enviar al servidor usando socket
@@ -272,17 +277,15 @@ void BTClient::net_thread()
     while (window->isOpen())
     {
         // RECEIVE WORLD
-
+            
         //Recibir Mensajes de red
         //Mostrar en pantalla el mensaje de la forma "nick: mensaje"
         BTMessage msg;
-        if (socket.recv(msg) != -1)
-        {
-            std::to_string(msg.type);
-        }
-
+        socket.recv(msg);
+        
+        //printf("a\n");
         // RENDER WORLD
-        //printf("a");    
+        
         // Clear screen
         window->clear(*bg);
 

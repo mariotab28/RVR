@@ -54,6 +54,9 @@ public:
     void render(sf::RenderWindow &window);
     void update(sf::RenderWindow &window);
     void handleInput(sf::RenderWindow &window);
+
+    char* serializate();
+    void deserializate();
 };
 
 #endif /* GAMEWORLD_H_ */

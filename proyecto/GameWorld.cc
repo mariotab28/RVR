@@ -214,3 +214,21 @@ void GameWorld::handleInput(sf::RenderWindow &window)
         }
     }
 }
+
+char* GameWorld::serializate()
+{
+    char* result;
+    for (auto go : gameObjects)
+    {
+        go->to_bin();
+        std::cout << go->data() << "\n";
+        result = go->data();
+    }
+
+    return result;
+}
+
+void GameWorld::deserializate()
+{
+    
+}
