@@ -9,7 +9,7 @@
 GameObject::GameObject(GameWorld *world, int goType)
     : BTMessage(""), world(world), goType(goType)
 {
-    MESSAGE_SIZE += sizeof(uint8_t) + sizeof(char)*20 + sizeof(float)*3;
+    MESSAGE_SIZE += sizeof(uint8_t) + sizeof(char) * 20 + sizeof(float) * 3;
 
     id = "";
     x = 0;
@@ -117,6 +117,15 @@ void GameObject::setId(const std::string &id)
     return std::pair<float, float>(dirX, dirY);
 }*/
 
+float GameObject::getX()
+{
+    return x;
+}
+float GameObject::getY()
+{
+    return y;
+}
+
 float GameObject::getRotation()
 {
     return angle;
@@ -173,28 +182,32 @@ void GameObject::handleInput(sf::Event &event)
 
 void GameObject::to_bin()
 {
+    //BTMessage::to_bin();
+
+    MESSAGE_SIZE = sizeof(uint8_t) + 20 * sizeof(char) + 3 * sizeof(float);
+
     alloc_data(MESSAGE_SIZE);
 
     memset(_data, 0, MESSAGE_SIZE);
 
     // serializar goType
-    memcpy(_data, static_cast<void*>(&goType), sizeof(uint8_t));
+    memcpy(_data, static_cast<void *>(&goType), sizeof(uint8_t));
     _data += sizeof(uint8_t);
 
     // serializar id
-    memcpy(_data, static_cast<void*>((char*)id.c_str()), 20*sizeof(char));
-    _data += 20*sizeof(char);
+    memcpy(_data, static_cast<void *>((char *)id.c_str()), 20 * sizeof(char));
+    _data += 20 * sizeof(char);
 
     // serializar x
-    memcpy(_data, static_cast<void*>(&x), sizeof(float));
+    memcpy(_data, static_cast<void *>(&x), sizeof(float));
     _data += sizeof(float);
 
     // serializar y
-    memcpy(_data, static_cast<void*>(&y), sizeof(float));
+    memcpy(_data, static_cast<void *>(&y), sizeof(float));
     _data += sizeof(float);
 
     // serializar angle
-    memcpy(_data, static_cast<void*>(&angle), sizeof(float));
+    memcpy(_data, static_cast<void *>(&angle), sizeof(float));
     _data += sizeof(float);
 
     // colocamos el puntero al inicio del fichero
@@ -206,33 +219,41 @@ int GameObject::from_bin(char *data)
     try
     {
         // deserializamos goType
-        memcpy(static_cast<void*>(&goType), data, sizeof(uint8_t));
+        memcpy(static_cast<void *>(&goType), data, sizeof(uint8_t));
         data += sizeof(uint8_t);
+
+        //printf("goType: %d\n", goType);
 
         // deserializamos id
         char auxId[20];
-        memcpy(static_cast<void*>(&id), data, 20*sizeof(char));
-        data += 20*sizeof(char);
-        auxId[20] = '\0';
+        memcpy(static_cast<void *>(&auxId), data, 20 * sizeof(char));
+        data += 20 * sizeof(char);
+        auxId[19] = '\0';
         id = auxId;
 
+        //printf("id: %s\n", id.c_str());
+
         // deserializamos x
-        memcpy(static_cast<void*>(&x), data, sizeof(float));
+        memcpy(static_cast<void *>(&x), data, sizeof(float));
         data += sizeof(float);
 
         // deserializamos y
-        memcpy(static_cast<void*>(&y), data, sizeof(float));
+        memcpy(static_cast<void *>(&y), data, sizeof(float));
         data += sizeof(float);
+
+        setPosition(x, y);
 
         // deserializamos angle
-        memcpy(static_cast<void*>(&angle), data, sizeof(float));
+        memcpy(static_cast<void *>(&angle), data, sizeof(float));
         data += sizeof(float);
 
-        data -= MESSAGE_SIZE;
+        setRotation(angle);
+
+        //data -= MESSAGE_SIZE;
 
         return 0;
     }
-    catch(const std::exception& e)
+    catch (const std::exception &e)
     {
         return -1;
     }

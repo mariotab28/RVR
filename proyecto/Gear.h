@@ -24,8 +24,8 @@ public:
     virtual void update();
     virtual void handleInput(sf::Event &event);*/
 
-    void to_bin();
-    int from_bin(char *data);
+    virtual void to_bin();
+    virtual int from_bin(char *data);
 };
 
 #endif /* GEAR_H_ */

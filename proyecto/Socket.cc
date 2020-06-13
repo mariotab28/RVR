@@ -36,7 +36,7 @@ int Socket::recv(Serializable &obj, Socket * &sock)
     socklen_t sa_len = sizeof(struct sockaddr);
 
     char buffer[MAX_MESSAGE_SIZE];
-
+    
     ssize_t bytes = ::recvfrom(sd, buffer, MAX_MESSAGE_SIZE, 0, &sa, &sa_len);
 
     //std:: cout << "bytes: " << bytes << "\n";

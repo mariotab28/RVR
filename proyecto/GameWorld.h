@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include "BTMessage.h"
 
 class GameObject;
 class Player;
@@ -14,7 +15,7 @@ namespace sf
     class Event;
 }; // namespace sf
 
-class GameWorld
+class GameWorld : public BTMessage
 {
 private:
     sf::Event *event;
@@ -35,6 +36,7 @@ public:
     ~GameWorld();
 
     void init();
+    void clientInit();
 
     GameObject *createSprite(int texture);
     GameObject *createText(int font, int characterSize);
@@ -55,8 +57,8 @@ public:
     void update(sf::RenderWindow &window);
     void handleInput(sf::RenderWindow &window);
 
-    char* serializate();
-    void deserializate();
+    virtual void to_bin();
+    virtual int from_bin(char * data);
 };
 
 #endif /* GAMEWORLD_H_ */

@@ -2,55 +2,8 @@
 
 #include <SFML/Graphics.hpp>
 #include "GameWorld.h"
-
-void BTMessage::to_bin()
-{
-    alloc_data(MESSAGE_SIZE);
-
-    memset(_data, 0, MESSAGE_SIZE);
-
-    // serializar type
-    memcpy(_data, static_cast<void *>(&type), sizeof(uint8_t));
-    _data += sizeof(uint8_t);
-
-    // serializar nick
-    memcpy(_data, static_cast<void *>((char *)nick.c_str()), 8 * sizeof(char));
-    _data += 8 * sizeof(char);
-
-    // colocamos el puntero al inicio del fichero
-    _data -= MESSAGE_SIZE;
-}
-
-int BTMessage::from_bin(char *data)
-{
-    try
-    {
-        //std::cout << "frombin\n";
-
-        // deserializamos type
-        memcpy(static_cast<void *>(&type), data, sizeof(uint8_t));
-        data += sizeof(uint8_t);
-
-        // deserializamos nick
-        char auxNick[8];
-        memcpy(static_cast<void *>(&auxNick), data, 8 * sizeof(char));
-        data += 8 * sizeof(char);
-        auxNick[7] = '\0';
-        nick = auxNick;
-
-        data -= MESSAGE_SIZE;
-
-        //std::cout << "frombin finished\n";
-
-        return 0;
-    }
-    catch (const std::exception &e)
-    {
-        return -1;
-    }
-}
-
-// -------------------------------------------------------------------------
+#include "BTMessage.h"
+#include "GameObject.h"
 
 void BTServer::start()
 {
@@ -61,7 +14,7 @@ void BTServer::start()
     bg = new sf::Color(180, 180, 180); //grey*/
 
     // ----LOAD RESOURCES-----
-    
+
     world = new GameWorld();
 
     printf("world created\n");
@@ -71,12 +24,15 @@ void BTServer::start()
     world->loadTexture("assets/bullet.png");
     world->loadTexture("assets/gear.png");
 
-
     world->loadFont("assets/arial.ttf");
 
     // ----INIT WORLD (READ MAP)---
 
+    clock = new sf::Clock();
+
     world->init();
+
+    printf("world initialized\n");
 }
 
 void BTServer::do_messages()
@@ -106,12 +62,12 @@ void BTServer::do_messages()
         {
             std::cout << "LOGIN " << *client << "\n";
             //std::cout << "LOGIN\n";
-            if(client == nullptr)
+            if (client == nullptr)
             {
                 printf("ERROR: Trying to login a nullptr client\n");
             }
             else
-            {    
+            {
                 // añadir el client al vector clients
                 clients.push_back(client);
             }
@@ -161,30 +117,61 @@ void BTServer::do_messages()
 
 void BTServer::simulate()
 {
-    
-
     while (true)
     {
-        // UPDATE WORLD
-        world->update(*window);
+        sf::Time elapsedTime = clock->getElapsedTime();
+        float deltaTime = elapsedTime.asMilliseconds();
 
-
-        // SEND ALL WORLD
-        BTMessage msg;
-        msg.type = BTMessage::OBJECT;
-        //std::cout << world->serializate() << "\n";
-
-        world->serializate();
-
-        //std::cout << "MESSAGE \n";
-        for (auto it = clients.begin(); it != clients.end(); ++it)
+        if (deltaTime > 33.33f)
         {
-            //std::cout << "ENVIANDO A " << *(*it) << "\n";
-            socket.send(msg, *(*it));
+            time = 0;
+
+            // UPDATE WORLD
+            //world->update(*window);
+            world->getGameObjects()[0]->setRotation(
+                world->getGameObjects()[0]->getRotation() + 0.1f);
+
+            /*world->getGameObjects()[0]->setPosition(
+            world->getGameObjects()[0]->getX()+0.1f,
+            world->getGameObjects()[0]->getY()
+        );*/
+
+            // Clear screen
+            /*window->clear(*bg);
+
+            // Render
+            //world->update(*window);
+            world->render(*window);
+
+            // Update the window
+            window->display();*/
+
+            //printf("%d\n")
+
+            // SEND ALL WORLD
+            //BTMessage msg;
+            //msg.type = BTMessage::OBJECT;
+            //std::cout << "serializate" << "\n";
+
+            //msg.setData(world->serializate());
+
+            //std::cout << "size: " << msg.size() << "\n";
+
+            //std::cout << "serializate finished" << "\n";
+
+            //std::cout << "MESSAGE \n";
+            for (auto it = clients.begin(); it != clients.end(); ++it)
+            {
+                //std::cout << "ENVIANDO A " << *(*it) << "\n";
+                socket.send(*world, *(*it));
+            }
+        }
+        else
+        {
+            time += deltaTime;
         }
     }
 }
-
 
 // --------------------------------------------------------------------
 
@@ -199,7 +186,7 @@ void BTClient::start()
     window->setActive(false);
 
     // ----LOAD RESOURCES-----
-    
+
     world = new GameWorld();
 
     printf("world created\n");
@@ -209,12 +196,13 @@ void BTClient::start()
     world->loadTexture("assets/bullet.png");
     world->loadTexture("assets/gear.png");
 
-
     world->loadFont("assets/arial.ttf");
 
     // ----INIT WORLD (READ MAP)---
 
-    world->init();
+    world->clientInit();
+
+    printf("clientInit\n");
 }
 
 void BTClient::login()
@@ -245,8 +233,7 @@ void BTClient::input_thread()
     {
         // HANDLE INPUT
         //printf("a\n");
-        world->handleInput(*window);
-
+        //world->handleInput(*window);
 
         // SEND INPUT MESSAGES TO SERVER
 
@@ -277,20 +264,26 @@ void BTClient::net_thread()
     while (window->isOpen())
     {
         // RECEIVE WORLD
-            
+
+        //printf("aaaaaa\n");
+
         //Recibir Mensajes de red
         //Mostrar en pantalla el mensaje de la forma "nick: mensaje"
-        BTMessage msg;
-        socket.recv(msg);
-        
+        //BTMessage msg;
+        socket.recv(*world);
+
+        //printf("deserializate\n");
+
+        //world->from_bin(msg.data());
+
         //printf("a\n");
         // RENDER WORLD
-        
+
         // Clear screen
         window->clear(*bg);
 
         // Render
-        world->update(*window);
+        //world->update(*window);
         world->render(*window);
 
         // Update the window

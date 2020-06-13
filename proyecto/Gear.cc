@@ -6,6 +6,7 @@
 
 Gear::Gear(GameWorld *world) : GameObject(world, 1)
 {
+    setId("Gear");
 }
 
 Gear::~Gear()
@@ -17,7 +18,7 @@ void Gear::update(sf::RenderWindow &window)
     GameObject::update(window);
 
     // check collision with a player--------------
-    std::vector<GameObject *> gameObjects = world->getGameObjects();
+    /*std::vector<GameObject *> gameObjects = world->getGameObjects();
 
     for (auto it = gameObjects.begin(); it != gameObjects.end(); ++it)
     {
@@ -33,7 +34,7 @@ void Gear::update(sf::RenderWindow &window)
             world->createGear(window);
             world->destroy(this);
         }
-    }
+    }*/
 }
 
 void Gear::to_bin()
@@ -47,6 +48,8 @@ int Gear::from_bin(char *data)
 {
     try
     {
+
+        //printf("gear from_bin\n");
         GameObject::from_bin(data);
 
         return 0;

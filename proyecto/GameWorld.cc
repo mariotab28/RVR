@@ -8,8 +8,9 @@
 #include "Bullet.h"
 #include "Gear.h"
 
-GameWorld::GameWorld()
+GameWorld::GameWorld() : BTMessage("")
 {
+    type = BTMessage::OBJECT;
 }
 
 GameWorld::~GameWorld()
@@ -22,6 +23,18 @@ GameWorld::~GameWorld()
         delete f;
 }
 
+void GameWorld::clientInit()
+{
+    Gear *g = new Gear(this);
+    g->setTexture(*textures[3]);
+    g->setScale(0.8, 0.8);
+    g->setPosition(0, 0);
+    g->setOrigin(g->getTexture()->getSize().x * 0.5,
+                 g->getTexture()->getSize().y * 0.5);
+
+    gameObjects.push_back(g);
+}
+
 void GameWorld::init()
 {
     // leer el highscore de un archivo!!!!
@@ -32,13 +45,13 @@ void GameWorld::init()
     Gear *g = new Gear(this);
     g->setTexture(*textures[3]);
     g->setScale(0.8, 0.8);
-    g->setPosition(500, 500);
+    g->setPosition(20, 500);
     g->setOrigin(g->getTexture()->getSize().x * 0.5,
                  g->getTexture()->getSize().y * 0.5);
 
     gameObjects.push_back(g);
 
-    Gear *g2 = new Gear(this);
+    /*Gear *g2 = new Gear(this);
     g2->setTexture(*textures[3]);
     g2->setScale(0.8, 0.8);
     g2->setPosition(200, 500);
@@ -86,7 +99,7 @@ void GameWorld::init()
 
     playerText = createText(0, 20);
     playerText->setPosition(20, 80);
-    playerText->setText(text);
+    playerText->setText(text);*/
 }
 
 std::vector<GameObject *> GameWorld::getGameObjects()
@@ -215,20 +228,53 @@ void GameWorld::handleInput(sf::RenderWindow &window)
     }
 }
 
-char* GameWorld::serializate()
+void GameWorld::to_bin()
 {
-    char* result;
-    for (auto go : gameObjects)
+    /*for (auto go : gameObjects)
     {
         go->to_bin();
         std::cout << go->data() << "\n";
         result = go->data();
-    }
+    }*/
 
-    return result;
+    //printf("%s\n",gameObjects[0]->getId().c_str());
+
+    gameObjects[0]->to_bin();
+
+    MESSAGE_SIZE = gameObjects[0]->MESSAGE_SIZE;
+
+    //std::cout << MESSAGE_SIZE << "\n";
+
+    alloc_data(MESSAGE_SIZE);
+    memset(_data, 0, MESSAGE_SIZE);
+
+    //printf("tobin\n");
+
+    // serializar goType
+    memcpy(_data, static_cast<void *>(gameObjects[0]->data()), gameObjects[0]->size());
+    _data += gameObjects[0]->size();
+
+    _data -= MESSAGE_SIZE;
+
+    //printf("data: %s", _data);
+
+    //printf("tobin done\n");
+
+    //std::cout << gameObjects[0]->data() << "\n";
 }
 
-void GameWorld::deserializate()
+int GameWorld::from_bin(char *data)
 {
-    
+    //std::cout << "gameWorld from_bin" << "\n";
+
+    if (gameObjects[0] == nullptr)
+        printf("null\n");
+    else
+        gameObjects[0]->from_bin(data);
+
+    //printf("x: %f y: %f\n",gameObjects[0]-> x,y);
+
+    //std::cout << "angle: " << gameObjects[0]->getRotation() << "\n";
+
+    return 0;
 }

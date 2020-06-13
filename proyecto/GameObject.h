@@ -1,7 +1,7 @@
 #ifndef GAMEOBJECT_H_
 #define GAMEOBJECT_H_
 
-#include "BT.h"
+#include "BTMessage.h"
 #include <string>
 
 namespace sf
@@ -67,6 +67,8 @@ public:
     void setSpeed(float speed);
 
     //const std::pair<float, float> getDir();
+    float getX();
+    float getY();
     std::string getId();
     float getRotation();
     sf::Sprite* getSprite();
