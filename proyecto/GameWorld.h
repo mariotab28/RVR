@@ -19,9 +19,20 @@ namespace sf
 class GameWorld : public BTMessage
 {
 private:
+
+    // 8 players, 1 gear, 50 bullets
+
+    int PLAYERS_SIZE = 8;
+    int GEARS_SIZE = 1;
+    int BULLETS_SIZE = 50;
+
     sf::Event event;
 
     std::vector<GameObject *> gameObjects;
+
+    std::vector<GameObject *> players;
+    std::vector<GameObject *> gears;
+    std::vector<GameObject *> bullets;
 
     std::vector<sf::Texture *> textures;
     std::vector<sf::Font *> fonts;
@@ -39,7 +50,9 @@ public:
     ~GameWorld();
 
     void init();
-    void clientInit();
+    void createObjects();
+
+    GameObject* getObjectFromPool(const std::vector<GameObject*>& pool);
 
     GameObject *createSprite(int texture);
     GameObject *createText(int font, int characterSize);

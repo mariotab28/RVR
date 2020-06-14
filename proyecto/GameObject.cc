@@ -20,6 +20,7 @@ GameObject::GameObject(GameWorld *world, int goType)
     speed = 0;
     dirX = 0;
     dirY = 0;
+    active = false;
 
     switch (goType)
     {
@@ -117,6 +118,13 @@ void GameObject::setId(const std::string &id)
     this->id = id;
 }
 
+void GameObject::setActive(bool active)
+{
+    this->active = active;
+}
+
+//-----------------------------------
+
 /*const std::pair<float, float> GameObject::getDir()
 {
     return std::pair<float, float>(dirX, dirY);
@@ -157,6 +165,13 @@ sf::Sprite *GameObject::getSprite()
     return static_cast<sf::Sprite *>(entity);
 }
 
+bool GameObject::isActive()
+{
+    return active;
+}
+
+//-----------------------------------
+
 void GameObject::render(sf::RenderWindow &window)
 {
     //std::cout << "goType: " << std::to_string(goType) << "\n";
@@ -189,8 +204,8 @@ void GameObject::to_bin()
 {
     //BTMessage::to_bin();
 
-    MESSAGE_SIZE = sizeof(uint8_t) + 20 * sizeof(char) + 3 * sizeof(float)
-    + 12* sizeof(char);
+    MESSAGE_SIZE = sizeof(uint8_t) + 20 * sizeof(char) + 
+    3 * sizeof(float) + 12 * sizeof(char) + sizeof(bool);
 
     alloc_data(MESSAGE_SIZE);
 
@@ -219,6 +234,10 @@ void GameObject::to_bin()
     // serializar text
     memcpy(_data, static_cast<void *>((char *)text.c_str()), 12 * sizeof(char));
     _data += 12 * sizeof(char);
+
+    // serializar active
+    memcpy(_data, static_cast<void *>(&active), sizeof(bool));
+    _data += sizeof(bool);
 
     // colocamos el puntero al inicio del fichero
     _data -= MESSAGE_SIZE;
@@ -270,8 +289,13 @@ int GameObject::from_bin(char *data)
         auxText[11] = '\0';
         text = auxText;
 
-        if(goType == 0)
+        if (goType == 0)
             setText(text);
+
+        // deserializamos active
+        memcpy(static_cast<void *>(&active), data, sizeof(bool));
+        data += sizeof(bool);
+        _size += sizeof(bool);
 
         //data -= MESSAGE_SIZE;
 

@@ -23,9 +23,44 @@ GameWorld::~GameWorld()
         delete f;
 }
 
-void GameWorld::clientInit()
+void GameWorld::createObjects()
 {
-    Gear *g = new Gear(this);
+    for (int i = 0; i < PLAYERS_SIZE; i++)
+    {
+        Player *player = new Player(this);
+        gameObjects.push_back(player);
+        players.push_back(player);
+
+        player->setTexture(*textures[0]);
+        player->setOrigin(player->getTexture()->getSize().x * 0.5,
+                          player->getTexture()->getSize().y * 0.5);
+        player->setGunTexture(*textures[1]);
+        player->setScale(0.5f, 0.5f);
+    }
+    for (int i = 0; i < GEARS_SIZE; i++)
+    {
+        Gear *gear = new Gear(this);
+        gameObjects.push_back(gear);
+        gears.push_back(gear);
+
+        gear->setTexture(*textures[3]);
+        gear->setOrigin(gear->getTexture()->getSize().x * 0.5,
+                        gear->getTexture()->getSize().y * 0.5);
+        gear->setScale(0.8, 0.8);
+    }
+    for (int i = 0; i < BULLETS_SIZE; i++)
+    {
+        Bullet *bullet = new Bullet(this);
+        gameObjects.push_back(bullet);
+        bullets.push_back(bullet);
+
+        bullet->setTexture(*textures[2]);
+        bullet->setOrigin(bullet->getTexture()->getSize().x * 0.5,
+                          bullet->getTexture()->getSize().y * 0.5);
+        bullet->setScale(0.8, 0.8);
+    }
+
+    /*Gear *g = new Gear(this);
     g->setTexture(*textures[3]);
     g->setScale(0.8, 0.8);
     g->setPosition(0, 0);
@@ -68,7 +103,7 @@ void GameWorld::clientInit()
 
     GameObject *text2 = createText(0, 20);
     text2->setPosition(0, 0);
-    text2->setText("NULL");
+    text2->setText("NULL");*/
 }
 
 void GameWorld::init()
@@ -78,17 +113,27 @@ void GameWorld::init()
 
     // TEST GEARS-------
 
-    Gear *g = new Gear(this);
-    g->setTexture(*textures[3]);
-    g->setScale(0.8, 0.8);
-    g->setPosition(20, 500);
-    g->setOrigin(g->getTexture()->getSize().x * 0.5,
-                 g->getTexture()->getSize().y * 0.5);
-    g->setId("Gear1");
+    Gear *g = static_cast<Gear *>(getObjectFromPool(gears));
 
-    gameObjects.push_back(g);
+    if (g != nullptr)
+    {
+        //= new Gear(this);
+        g->setActive(true);
+        g->setPosition(20, 500);
+        g->setId("Gear1");
+    }
 
-    Gear *g2 = new Gear(this);
+    Player *p = static_cast<Player *>(getObjectFromPool(players));
+
+    if (p != nullptr)
+    {
+        //= new Gear(this);
+        p->setActive(true);
+        p->setPosition(20, 500);
+        p->setId("Player1");
+    }
+
+    /*Gear *g2 = new Gear(this);
     g2->setTexture(*textures[3]);
     g2->setScale(0.8, 0.8);
     g2->setPosition(200, 500);
@@ -127,7 +172,7 @@ void GameWorld::init()
 
     text1 = createText(0, 20);
     text1->setPosition(20, 60);
-    text1->setText("RANKING" + std::to_string(highScore));
+    text1->setText("RANKING" + std::to_string(highScore));*/
 
     /*GameObject *text2 = createText(0, 20);
     text2->setPosition(20, 20);
@@ -138,6 +183,21 @@ void GameWorld::init()
     playerText = createText(0, 20);
     playerText->setPosition(20, 80);
     playerText->setText(text);*/
+}
+
+GameObject *GameWorld::getObjectFromPool(const std::vector<GameObject *> &pool)
+{
+    GameObject *go = nullptr;
+    int i = 0;
+    while (i < pool.size() && pool[i]->isActive())
+        i++;
+
+    printf("pool size: %d i: %d\n", pool.size(), i);
+
+    if (i < pool.size())
+        go = pool[i];
+
+    return go;
 }
 
 std::vector<GameObject *> GameWorld::getGameObjects()
@@ -243,14 +303,19 @@ void GameWorld::createGear(const sf::RenderWindow &window)
 void GameWorld::render(sf::RenderWindow &window)
 {
     for (auto go : gameObjects)
-        go->render(window);
+    {
+        if (go->isActive())
+            go->render(window);
+    }
 }
 
 void GameWorld::update(sf::RenderWindow &window)
 {
     for (auto go : gameObjects)
-        go->update(window);
-
+    {
+        if (go->isActive())
+            go->update(window);
+    }
 
     /*highScore++;
     text1->setText("RANKING" + std::to_string(highScore));*/
@@ -265,22 +330,28 @@ void GameWorld::handleInput(sf::RenderWindow &window)
         else
         {
             for (auto go : gameObjects)
-                go->handleInput(event, window);
+            {
+                if (go->isActive())
+                    go->handleInput(event, window);
+            }
         }
     }
 }
 
 void GameWorld::to_bin()
 {
+    //BTMessage::to_bin();
+
     MESSAGE_SIZE = 0;
 
-    //printf("%d\n", gameObjects.size());
+    //printf("gameobjects size: %d\n", gameObjects.size());
+
     // Calculate GameWorld message_size
-    //for (auto go : gameObjects)
-    for (size_t i = 0; i < gameObjects.size(); i++)
+    for (auto go : gameObjects)
+    //for (size_t i = 0; i < gameObjects.size(); i++)
     {
-        gameObjects[i]->to_bin();
-        MESSAGE_SIZE += gameObjects[i]->MESSAGE_SIZE;
+        go->to_bin();
+        MESSAGE_SIZE += go->MESSAGE_SIZE;
         //printf("go size: %d\n", go->MESSAGE_SIZE);
         //printf("%d\n", gameObjects.size());
     }
@@ -330,6 +401,8 @@ int GameWorld::from_bin(char *data)
         //printf("size: %d\n", go->size());
         //printf("a\n");
     }
+
+    printf("gear active: %d posX: %f\n", gameObjects[8]->isActive(), gameObjects[8]->getX());
 
     //printf("frombin finished\n");
     //printf("1x: %f 1y: %f\n", gameObjects[0]->getX(), gameObjects[0]->getY());

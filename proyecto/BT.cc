@@ -32,6 +32,7 @@ void BTServer::start()
 
     clock = new sf::Clock();
 
+    world->createObjects();
     world->init();
 
     printf("world initialized\n");
@@ -133,13 +134,13 @@ void BTServer::simulate()
         // UPDATE WORLD
         world->update(*window);
         
-        world->getGameObjects()[0]->setRotation(
+        /*world->getGameObjects()[0]->setRotation(
             world->getGameObjects()[0]->getRotation() + 0.1f);
 
         world->getGameObjects()[0]->setPosition(
             world->getGameObjects()[0]->getX()+0.1f,
             world->getGameObjects()[0]->getY()
-        );
+        );*/
 
         // Clear screen
         window->clear(*bg);
@@ -207,7 +208,7 @@ void BTClient::start()
 
     // ----INIT WORLD (READ MAP)---
 
-    world->clientInit();
+    world->createObjects();
 
     printf("clientInit\n");
 }

@@ -38,6 +38,8 @@ protected:
 
     std::string text; // max 12
 
+    bool active;
+
     // serializar?
     float speed;
     float dirX, dirY;
@@ -67,6 +69,7 @@ public:
     void setOrigin(float originX, float originY);
     void setDir(float dirX, float dirY);
     void setSpeed(float speed);
+    void setActive(bool active);
 
     //const std::pair<float, float> getDir();
     float getX();
@@ -74,6 +77,7 @@ public:
     std::string getId();
     float getRotation();
     sf::Sprite* getSprite();
+    bool isActive();
 
     virtual void to_bin();
     virtual int from_bin(char *data);
