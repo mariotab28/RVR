@@ -16,9 +16,9 @@ Gear::~Gear()
 void Gear::update(sf::RenderWindow &window)
 {
     GameObject::update(window);
-
+    
     // check collision with a player--------------
-    /*std::vector<GameObject *> gameObjects = world->getGameObjects();
+    std::vector<GameObject *> gameObjects = world->getGameObjects();
 
     for (auto it = gameObjects.begin(); it != gameObjects.end(); ++it)
     {
@@ -29,12 +29,13 @@ void Gear::update(sf::RenderWindow &window)
             && (*it)->getId().compare(0,6,"Player") == 0)
         {
             static_cast<Player*>(*it)->setPoints(static_cast<Player*>(*it)->getPoints() + 1);
-            world->updateScores();
+            //world->updateScores();
+            setActive(false);
             printf("gear recogido!\n");
-            world->createGear(window);
-            world->destroy(this);
+            //world->createGear(window);
+            //world->destroy(this);
         }
-    }*/
+    }
 }
 
 void Gear::to_bin()

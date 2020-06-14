@@ -60,45 +60,42 @@ void Player::update(sf::RenderWindow &window)
     }*/
 }
 
-void Player::handleInput(sf::Event &event, sf::RenderWindow &window)
+void Player::processInput(BTMessage message)
 {
-    if (event.type == sf::Event::KeyPressed)
+    if (message.message.compare(0, 5, "Press") == 0)
     {
         // MOVEMENT INPUT
-        if (event.key.code == sf::Keyboard::D)
+        if (message.message.compare(5, 1, "D") == 0)
             incAngle = 0.5;
-        if (event.key.code == sf::Keyboard::A)
+        if (message.message.compare(5, 1, "A") == 0)
             incAngle = -0.5;
-        if (event.key.code == sf::Keyboard::W)
+        if (message.message.compare(5, 1, "W") == 0)
             speed = 0.3;
-        if (event.key.code == sf::Keyboard::S)
+        if (message.message.compare(5, 1, "S") == 0)
             speed = -0.3;
-
-        /*if (event.key.code == sf::Keyboard::Space)
-            shoot();*/
     }
 
-    if (event.type == sf::Event::KeyReleased)
+    if (message.message.compare(0, 5, "Relea") == 0)
     {
-        if (event.key.code == sf::Keyboard::D)
+        if (message.message.compare(5, 1, "D") == 0)
             incAngle = 0;
-        if (event.key.code == sf::Keyboard::A)
+        if (message.message.compare(5, 1, "A") == 0)
             incAngle = 0;
-        if (event.key.code == sf::Keyboard::W)
+        if (message.message.compare(5, 1, "W") == 0)
             speed = 0;
-        if (event.key.code == sf::Keyboard::S)
+        if (message.message.compare(5, 1, "S") == 0)
             speed = 0;
     }
 
-    if (event.type == sf::Event::MouseButtonPressed)
+    if (message.message.compare(0, 5, "Mouse") == 0)
     {
         printf("shoot!\n");
         shoot();
     }
-    
+
     // TODO: ESTO DA ERROR CUANDO SE CIERRA LA VENTANA!!
-    mouseX = sf::Mouse::getPosition(window).x;
-    mouseY = sf::Mouse::getPosition(window).y;
+    mouseX = message.mouseX;
+    mouseY = message.mouseY;
 }
 
 void Player::shoot()

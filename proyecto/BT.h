@@ -61,7 +61,6 @@ public:
 
     void input_thread();
     void net_thread();
-    //void render_thread();
 
     void wait();
 
@@ -73,4 +72,11 @@ private:
 
     Socket socket;
     std::string nick;
+
+    int index;
+
+    float time;
+    float deltaTime;
+    sf::Clock* clock;
+    sf::Time elapsedTime;
 };

@@ -26,7 +26,9 @@ public:
 
     virtual void render(sf::RenderWindow &window);
     virtual void update(sf::RenderWindow &window);
-    virtual void handleInput(sf::Event &event, sf::RenderWindow &window);
+    //virtual void handleInput(sf::Event &event, sf::RenderWindow &window);
+
+    void processInput(BTMessage message);
 
     void setGunTexture(sf::Texture &texture);
     void shoot();

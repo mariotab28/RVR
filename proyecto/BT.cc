@@ -73,13 +73,29 @@ void BTServer::do_messages()
             {
                 // añadir el client al vector clients
                 clients.push_back(client);
+
+                // enviar mensaje de accept con index
+                BTMessage acceptMessage;
+                acceptMessage.type = BTMessage::ACCEPT;
+                acceptMessage.index = clients.size();
+
+                socket.send(acceptMessage, *clients[clients.size() - 1]);
+
+                // crear tanque del jugador
+                world->createPlayer(clients.size(), message.nick);
             }
+
+            std::cout << "CLIENTS CONNECTED: " << clients.size() << "\n";
 
             break;
         }
         case BTMessage::LOGOUT:
         {
             std::cout << "LOGOUT " << *client << "\n";
+
+            // TODO: REORDENAR INDEX Y SETID() DE PLAYERS!!!
+
+            //int pos = 0;
             // buscar si existe el socket client en el vector clients
             for (auto it = clients.begin(); it != clients.end(); ++it)
             {
@@ -89,16 +105,36 @@ void BTServer::do_messages()
                     clients.erase(it);
                     break;
                 }
+
+                //pos++;
             }
+
+            /*if(pos < clients.size())
+            {
+                ;
+            }*/
+
+            std::cout << "CLIENTS CONNECTED: " << clients.size() << "\n";
 
             break;
         }
-        case BTMessage::OBJECT:
+        case BTMessage::INPUT:
         {
+
+            // transcribir el texto del mensaje a input
+            //if (message.message.size() > 0)
+            //{
+            //printf("message: %s\n", message.message.c_str());
+            // hacer handleInput para el jugador indicado en el msg
+            //printf("index: %d\n", message.index);
+
+            world->processInput(message);
+            //}
+
             // comprobar que el client este logeado (i.e. este en el vector
             // clients)
-            /*std::cout << "MESSAGE " << *client << "\n";
-            for (auto it = clients.begin(); it != clients.end(); ++it)
+            //std::cout << "MESSAGE " << *client << "\n";
+            /*for (auto it = clients.begin(); it != clients.end(); ++it)
             {
                 if (!(*(*it) == *client))
                 {
@@ -112,9 +148,6 @@ void BTServer::do_messages()
         default:
             break;
         }
-
-        std::cout << "CLIENTS CONNECTED: " << clients.size() << "\n";
-        //std::cout << "TYPE: " << (int) message.type << " NICK: "<<  message.nick  << " MESSAGE: " << message.message << "\n";
     }
 }
 
@@ -132,8 +165,13 @@ void BTServer::simulate()
         //time = 0;
 
         // UPDATE WORLD
+
+        // ver si hay algun input en la cola
+        // sacar el input de la cola
+        // y evaluar
+
         world->update(*window);
-        
+
         /*world->getGameObjects()[0]->setRotation(
             world->getGameObjects()[0]->getRotation() + 0.1f);
 
@@ -172,7 +210,6 @@ void BTServer::simulate()
             socket.send(*world, *(*it));
         }
 
-        
         /*}
         else
         {
@@ -210,6 +247,10 @@ void BTClient::start()
 
     world->createObjects();
 
+    clock = new sf::Clock();
+    time = 0;
+    deltaTime = 0;
+
     printf("clientInit\n");
 }
 
@@ -241,10 +282,33 @@ void BTClient::input_thread()
     {
         // HANDLE INPUT
         //printf("a\n");
-        world->handleInput(*window);
 
-        // SEND INPUT MESSAGES TO SERVER
+        elapsedTime = clock->restart();
+        deltaTime = elapsedTime.asMilliseconds();
 
+        printf("time: %f deltaTime: %f\n", time, deltaTime);
+
+        if (time > 33.33f)
+        {
+            time = 0;
+
+            printf("tick\n");
+
+            BTMessage inputMessage(nick);
+            inputMessage.type = BTMessage::INPUT;
+            inputMessage.index = index;
+
+            if (world->handleInput(*window, inputMessage))
+            {
+                // SEND INPUT MESSAGES TO SERVER
+                if (socket.send(inputMessage, socket) < 0)
+                    printf("send error!\n");
+            }
+        }
+        else
+        {
+            time += deltaTime;
+        }
         //printf("a\n");
 
         // Leer stdin con std::getline
@@ -309,6 +373,15 @@ void BTClient::wait()
 {
     BTMessage msg;
     socket.recv(msg);
+
+    if (msg.type == BTMessage::ACCEPT)
+    {
+        index = msg.index;
+    }
+    else
+    {
+        wait();
+    }
 }
 
 /*void BTClient::render_thread()

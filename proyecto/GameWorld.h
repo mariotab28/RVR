@@ -52,6 +52,8 @@ public:
     void init();
     void createObjects();
 
+    void createPlayer(int i, const std::string& nick);
+
     GameObject* getObjectFromPool(const std::vector<GameObject*>& pool);
 
     GameObject *createSprite(int texture);
@@ -71,7 +73,9 @@ public:
 
     void render(sf::RenderWindow &window);
     void update(sf::RenderWindow &window);
-    void handleInput(sf::RenderWindow &window);
+    bool handleInput(sf::RenderWindow &window, BTMessage& message);
+
+    void processInput(BTMessage message);
 
     virtual void to_bin();
     virtual int from_bin(char * data);

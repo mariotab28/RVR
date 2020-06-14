@@ -10,7 +10,7 @@
 
 GameWorld::GameWorld() : BTMessage("")
 {
-    type = BTMessage::OBJECT;
+    //type = BTMessage::OBJECT;
 }
 
 GameWorld::~GameWorld()
@@ -123,16 +123,6 @@ void GameWorld::init()
         g->setId("Gear1");
     }
 
-    Player *p = static_cast<Player *>(getObjectFromPool(players));
-
-    if (p != nullptr)
-    {
-        //= new Gear(this);
-        p->setActive(true);
-        p->setPosition(20, 500);
-        p->setId("Player1");
-    }
-
     /*Gear *g2 = new Gear(this);
     g2->setTexture(*textures[3]);
     g2->setScale(0.8, 0.8);
@@ -185,6 +175,22 @@ void GameWorld::init()
     playerText->setText(text);*/
 }
 
+void GameWorld::createPlayer(int i, const std::string &nick)
+{
+    Player *p = static_cast<Player *>(getObjectFromPool(players));
+
+    if (p != nullptr)
+    {
+        p->setActive(true);
+        p->setPosition(400, 500);
+        p->setId("Player" + std::to_string(i));
+
+        // crear score
+
+        // poner nick en score
+    }
+}
+
 GameObject *GameWorld::getObjectFromPool(const std::vector<GameObject *> &pool)
 {
     GameObject *go = nullptr;
@@ -192,7 +198,7 @@ GameObject *GameWorld::getObjectFromPool(const std::vector<GameObject *> &pool)
     while (i < pool.size() && pool[i]->isActive())
         i++;
 
-    printf("pool size: %d i: %d\n", pool.size(), i);
+    //printf("pool size: %d i: %d\n", pool.size(), i);
 
     if (i < pool.size())
         go = pool[i];
@@ -321,21 +327,107 @@ void GameWorld::update(sf::RenderWindow &window)
     text1->setText("RANKING" + std::to_string(highScore));*/
 }
 
-void GameWorld::handleInput(sf::RenderWindow &window)
+bool GameWorld::handleInput(sf::RenderWindow &window, BTMessage& message)
 {
+    bool result = false;
     while (window.pollEvent(event))
     {
         if (event.type == sf::Event::Closed)
-            window.close();
-        else
         {
-            for (auto go : gameObjects)
+            window.close();
+            result = true;
+        }
+        else
+        { // LLAMAR AL HANDLEINPUT DE 1 PLAYER SOLO
+            /*for (auto go : gameObjects)
             {
                 if (go->isActive())
                     go->handleInput(event, window);
+            }*/
+
+            if (event.type == sf::Event::KeyPressed)
+            {
+                message.message = "Press";
+                // MOVEMENT INPUT
+                if (event.key.code == sf::Keyboard::D)
+                {
+                    message.message.append("D");
+                    result = true;
+                }
+                if (event.key.code == sf::Keyboard::A)
+                {
+                    message.message.append("A");
+                    result = true;
+                }
+                if (event.key.code == sf::Keyboard::W)
+                {
+                    message.message.append("W");
+                    result = true;
+                }
+                if (event.key.code == sf::Keyboard::S)
+                {
+                   message.message.append("S");
+                   result = true;
+                }
             }
+
+            if (event.type == sf::Event::KeyReleased)
+            {
+                message.message = "Relea";
+                if (event.key.code == sf::Keyboard::D)
+                {
+                    message.message.append("D");
+                    result = true;
+                }
+                if (event.key.code == sf::Keyboard::A)
+                {
+                    message.message.append("A");
+                    result = true;
+                }
+                if (event.key.code == sf::Keyboard::W)
+                {
+                    message.message.append("W");
+                    result = true;
+                }
+                if (event.key.code == sf::Keyboard::S)
+                {
+                    message.message.append("S");
+                    result = true;
+                }
+            }
+
+            if (event.type == sf::Event::MouseButtonPressed)
+            {
+                message.message = "Mouse";
+                result = true;
+            }
+
+            // TODO: ESTO DA ERROR CUANDO SE CIERRA LA VENTANA!!
+            if(mouseX != sf::Mouse::getPosition(window).x)
+            {
+                mouseX = sf::Mouse::getPosition(window).x;
+                message.mouseX = sf::Mouse::getPosition(window).x;
+                result = true;
+            }
+
+            if(mouseY != sf::Mouse::getPosition(window).y)
+            {
+                mouseY = sf::Mouse::getPosition(window).y;
+                message.mouseY = sf::Mouse::getPosition(window).y;
+                result = true;
+            }
+            
+            //message.mouseY = sf::Mouse::getPosition(window).y;
         }
     }
+
+    return result;
+}
+
+void GameWorld::processInput(BTMessage message)
+{
+    //printf("process input index: %d\n", message.index);
+    static_cast<Player*>(players[message.index-1])->processInput(message);
 }
 
 void GameWorld::to_bin()
@@ -402,7 +494,7 @@ int GameWorld::from_bin(char *data)
         //printf("a\n");
     }
 
-    printf("gear active: %d posX: %f\n", gameObjects[8]->isActive(), gameObjects[8]->getX());
+    //printf("gear active: %d posX: %f\n", gameObjects[8]->isActive(), gameObjects[8]->getX());
 
     //printf("frombin finished\n");
     //printf("1x: %f 1y: %f\n", gameObjects[0]->getX(), gameObjects[0]->getY());
