@@ -3,9 +3,9 @@
 #include <string.h>
 #include "BT.h"
 #include <SFML/Graphics.hpp>
-#include <X11/Xlib.h>  
+#include <X11/Xlib.h>
 
-void _client_thread(BTClient* ec)
+void _client_thread(BTClient *ec)
 {
     ec->net_thread();
 }
@@ -15,7 +15,9 @@ int main(int argc, char **argv)
     XInitThreads();
 
     BTClient ec(argv[1], argv[2], argv[3]);
+    ec.login();
 
+    ec.wait();
     // create window, load resources
     ec.start();
 
@@ -32,8 +34,7 @@ int main(int argc, char **argv)
     sf::Thread thread(&_client_thread, &ec);
     thread.launch();
 
-    ec.login();
+    
 
     ec.input_thread();
 }
-

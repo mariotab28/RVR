@@ -2,7 +2,7 @@
 
 void BTMessage::to_bin()
 {
-    /*alloc_data(MESSAGE_SIZE);
+    alloc_data(MESSAGE_SIZE);
 
     memset(_data, 0, MESSAGE_SIZE);
  
@@ -16,7 +16,7 @@ void BTMessage::to_bin()
     _data += 8 * sizeof(char);
 
     // colocamos el puntero al inicio del fichero
-    _data -= MESSAGE_SIZE;*/
+    _data -= MESSAGE_SIZE;
 }
 
 int BTMessage::from_bin(char *data)
@@ -26,7 +26,7 @@ int BTMessage::from_bin(char *data)
         //std::cout << "frombin\n";
 
         // deserializamos type
-        /*memcpy(static_cast<void *>(&type), data, sizeof(uint8_t));
+        memcpy(static_cast<void *>(&type), data, sizeof(uint8_t));
         data += sizeof(uint8_t);
 
         // deserializamos nick
@@ -38,7 +38,7 @@ int BTMessage::from_bin(char *data)
 
         data -= MESSAGE_SIZE;
 
-        //std::cout << "frombin finished\n";*/
+        //std::cout << "frombin finished\n";
 
         return 0;
     }

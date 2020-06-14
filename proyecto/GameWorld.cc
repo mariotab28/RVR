@@ -33,6 +33,27 @@ void GameWorld::clientInit()
                  g->getTexture()->getSize().y * 0.5);
 
     gameObjects.push_back(g);
+
+    Gear *g2 = new Gear(this);
+    g2->setTexture(*textures[3]);
+    g2->setScale(0.8, 0.8);
+    g2->setPosition(0, 0);
+    g2->setOrigin(g2->getTexture()->getSize().x * 0.5,
+                  g2->getTexture()->getSize().y * 0.5);
+
+    gameObjects.push_back(g2);
+
+    // -----CREATE PLAYER------
+    Player *player = new Player(this);
+    player->setTexture(*textures[0]);
+    player->setOrigin(player->getTexture()->getSize().x * 0.5,
+                      player->getTexture()->getSize().y * 0.5);
+    player->setGunTexture(*textures[1]);
+    gameObjects.push_back(player);
+
+    player->setPosition(0, 0);
+    player->setScale(0.5f, 0.5f);
+    player->setId("Player1");
 }
 
 void GameWorld::init()
@@ -48,20 +69,22 @@ void GameWorld::init()
     g->setPosition(20, 500);
     g->setOrigin(g->getTexture()->getSize().x * 0.5,
                  g->getTexture()->getSize().y * 0.5);
+    g->setId("Gear1");
 
     gameObjects.push_back(g);
 
-    /*Gear *g2 = new Gear(this);
+    Gear *g2 = new Gear(this);
     g2->setTexture(*textures[3]);
     g2->setScale(0.8, 0.8);
     g2->setPosition(200, 500);
     g2->setOrigin(g2->getTexture()->getSize().x * 0.5,
                   g2->getTexture()->getSize().y * 0.5);
+    g2->setId("Gear2");
 
     gameObjects.push_back(g2);
 
     // -----CREATE PLAYER------
-    player = new Player(this);
+    Player *player = new Player(this);
     player->setTexture(*textures[0]);
     player->setOrigin(player->getTexture()->getSize().x * 0.5,
                       player->getTexture()->getSize().y * 0.5);
@@ -74,7 +97,7 @@ void GameWorld::init()
 
     // PLAYER 2 TO TEST DEATH-----
 
-    player2 = new Player(this);
+    /*player2 = new Player(this);
     player2->setTexture(*textures[0]);
     player2->setOrigin(player2->getTexture()->getSize().x * 0.5,
                        player2->getTexture()->getSize().y * 0.5);
@@ -179,7 +202,7 @@ void GameWorld::destroy(GameObject *go)
 
 void GameWorld::updateScores()
 {
-    text = "P1 POINTS: " + std::to_string(player->getPoints());
+    //text = "P1 POINTS: " + std::to_string(player->getPoints());
     playerText->setText(text);
 }
 
@@ -216,64 +239,82 @@ void GameWorld::update(sf::RenderWindow &window)
 
 void GameWorld::handleInput(sf::RenderWindow &window)
 {
-    while (window.pollEvent(*event))
+    while (window.pollEvent(event))
     {
-        if (event->type == sf::Event::Closed)
+        if (event.type == sf::Event::Closed)
             window.close();
         else
         {
             for (auto go : gameObjects)
-                go->handleInput(*event);
+                go->handleInput(event);
         }
     }
 }
 
 void GameWorld::to_bin()
 {
-    /*for (auto go : gameObjects)
+    MESSAGE_SIZE = 0;
+
+    //printf("%d\n", gameObjects.size());
+    // Calculate GameWorld message_size
+    //for (auto go : gameObjects)
+    for (size_t i = 0; i < gameObjects.size(); i++)
     {
-        go->to_bin();
-        std::cout << go->data() << "\n";
-        result = go->data();
-    }*/
-
+        gameObjects[i]->to_bin();
+        MESSAGE_SIZE += gameObjects[i]->MESSAGE_SIZE;
+        //printf("go size: %d\n", go->MESSAGE_SIZE);
+        //printf("%d\n", gameObjects.size());
+    }
+    //printf("eeeee\n");
     //printf("%s\n",gameObjects[0]->getId().c_str());
-
-    gameObjects[0]->to_bin();
-
-    MESSAGE_SIZE = gameObjects[0]->MESSAGE_SIZE;
-
     //std::cout << MESSAGE_SIZE << "\n";
 
     alloc_data(MESSAGE_SIZE);
+    //printf("ooooo\n");
     memset(_data, 0, MESSAGE_SIZE);
 
-    //printf("tobin\n");
+    // Serialize each gameObject
+    for (auto go : gameObjects)
+    {
+        // serializar goType
+        memcpy(_data, static_cast<void *>(go->data()), go->size());
 
-    // serializar goType
-    memcpy(_data, static_cast<void *>(gameObjects[0]->data()), gameObjects[0]->size());
-    _data += gameObjects[0]->size();
+        printf("go data: %c\n", _data);
+        _data += go->size();
+
+        //printf("copied go size: %d\n", go->size());
+    }
+
+    printf("finished: %d\n", MESSAGE_SIZE);
 
     _data -= MESSAGE_SIZE;
 
-    //printf("data: %s", _data);
+    //printf("gameobjects size: %d\n", gameObjects.size());
 
+    //printf("data size: %d\n", strlen(_data));
     //printf("tobin done\n");
-
     //std::cout << gameObjects[0]->data() << "\n";
 }
 
 int GameWorld::from_bin(char *data)
 {
     //std::cout << "gameWorld from_bin" << "\n";
+    for (auto go : gameObjects)
+    {
+        if (go == nullptr)
+            printf("null\n");
+        else
+            go->from_bin(data);
+        
+        data += go->size();
 
-    if (gameObjects[0] == nullptr)
-        printf("null\n");
-    else
-        gameObjects[0]->from_bin(data);
+        //printf("size: %d\n", go->size());
+        //printf("a\n");
+    }
 
-    //printf("x: %f y: %f\n",gameObjects[0]-> x,y);
-
+    //printf("frombin finished\n");
+    //printf("1x: %f 1y: %f\n", gameObjects[0]->getX(), gameObjects[0]->getY());
+    //printf("2x: %f 2y: %f\n", gameObjects[1]->getX(), gameObjects[1]->getY());
     //std::cout << "angle: " << gameObjects[0]->getRotation() << "\n";
 
     return 0;

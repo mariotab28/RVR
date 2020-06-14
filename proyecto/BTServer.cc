@@ -19,8 +19,8 @@ int main(int argc, char **argv)
 {
     XInitThreads();
 
-    /*sigset_t waitset;
-    int      sig;*/
+    sigset_t waitset;
+    int      sig;
 
     BTServer es(argv[1], argv[2]);
 
@@ -33,10 +33,10 @@ int main(int argc, char **argv)
     es.simulate();
     //es.do_messages();
 
-    /*sigemptyset(&waitset);
+    sigemptyset(&waitset);
     sigaddset(&waitset, SIGQUIT);
 
-    sigwait(&waitset, &sig);*/
+    sigwait(&waitset, &sig);
 
     return 0;
 }

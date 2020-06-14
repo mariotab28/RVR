@@ -1,17 +1,19 @@
 #include "BT.h"
 
-#include <SFML/Graphics.hpp>
 #include "GameWorld.h"
 #include "BTMessage.h"
 #include "GameObject.h"
 
 void BTServer::start()
 {
+    time = 0;
     // ----WINDOW CREATION-----
-    /*window = new sf::RenderWindow(sf::VideoMode(800, 600), "Window title");
+    window = new sf::RenderWindow(sf::VideoMode(800, 600), "Window title");
     window->setTitle("Bouncy Tanks - SERVER");
     // background color
-    bg = new sf::Color(180, 180, 180); //grey*/
+    bg = new sf::Color(180, 180, 180); //grey
+
+    window->setVisible(false);
 
     // ----LOAD RESOURCES-----
 
@@ -119,57 +121,61 @@ void BTServer::simulate()
 {
     while (true)
     {
-        sf::Time elapsedTime = clock->getElapsedTime();
-        float deltaTime = elapsedTime.asMilliseconds();
+        //elapsedTime = clock->restart();
+        //deltaTime = elapsedTime.asMilliseconds();
 
-        if (deltaTime > 33.33f)
-        {
-            time = 0;
+        //printf("time: %f deltaTime: %f\n", time, deltaTime);
 
-            // UPDATE WORLD
-            //world->update(*window);
-            world->getGameObjects()[0]->setRotation(
-                world->getGameObjects()[0]->getRotation() + 0.1f);
+        //if (time > 33.33f)
+        //{
+        //time = 0;
 
-            /*world->getGameObjects()[0]->setPosition(
+        // UPDATE WORLD
+        world->update(*window);
+        world->getGameObjects()[0]->setRotation(
+            world->getGameObjects()[0]->getRotation() + 0.1f);
+
+        world->getGameObjects()[0]->setPosition(
             world->getGameObjects()[0]->getX()+0.1f,
             world->getGameObjects()[0]->getY()
-        );*/
+        );
 
-            // Clear screen
-            /*window->clear(*bg);
+        // Clear screen
+        window->clear(*bg);
 
-            // Render
-            //world->update(*window);
-            world->render(*window);
+        // Render
+        //world->update(*window);
+        world->render(*window);
 
-            // Update the window
-            window->display();*/
+        // Update the window
+        window->display();
 
-            //printf("%d\n")
+        //printf("%d\n")
 
-            // SEND ALL WORLD
-            //BTMessage msg;
-            //msg.type = BTMessage::OBJECT;
-            //std::cout << "serializate" << "\n";
+        // SEND ALL WORLD
+        //BTMessage msg;
+        //msg.type = BTMessage::OBJECT;
+        //std::cout << "serializate" << "\n";
 
-            //msg.setData(world->serializate());
+        //msg.setData(world->serializate());
 
-            //std::cout << "size: " << msg.size() << "\n";
+        //std::cout << "size: " << msg.size() << "\n";
 
-            //std::cout << "serializate finished" << "\n";
+        //std::cout << "serializate finished" << "\n";
 
-            //std::cout << "MESSAGE \n";
-            for (auto it = clients.begin(); it != clients.end(); ++it)
-            {
-                //std::cout << "ENVIANDO A " << *(*it) << "\n";
-                socket.send(*world, *(*it));
-            }
+        //std::cout << "MESSAGE \n";
+        for (auto it = clients.begin(); it != clients.end(); ++it)
+        {
+            //std::cout << "ENVIANDO A " << *(*it) << "\n";
+            socket.send(*world, *(*it));
         }
+
+        
+        /*}
         else
         {
             time += deltaTime;
-        }
+        }*/
     }
 }
 
@@ -233,7 +239,7 @@ void BTClient::input_thread()
     {
         // HANDLE INPUT
         //printf("a\n");
-        //world->handleInput(*window);
+        world->handleInput(*window);
 
         // SEND INPUT MESSAGES TO SERVER
 
@@ -295,6 +301,12 @@ void BTClient::net_thread()
     /*delete bg;
     delete window;
     delete world;*/
+}
+
+void BTClient::wait()
+{
+    BTMessage msg;
+    socket.recv(msg);
 }
 
 /*void BTClient::render_thread()

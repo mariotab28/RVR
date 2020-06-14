@@ -198,6 +198,8 @@ void GameObject::to_bin()
     memcpy(_data, static_cast<void *>((char *)id.c_str()), 20 * sizeof(char));
     _data += 20 * sizeof(char);
 
+    //printf("size id: %d\n", id.size());
+
     // serializar x
     memcpy(_data, static_cast<void *>(&x), sizeof(float));
     _data += sizeof(float);
@@ -218,34 +220,39 @@ int GameObject::from_bin(char *data)
 {
     try
     {
+        _size = 0;
         // deserializamos goType
         memcpy(static_cast<void *>(&goType), data, sizeof(uint8_t));
         data += sizeof(uint8_t);
-
+        _size += sizeof(uint8_t);
         //printf("goType: %d\n", goType);
 
         // deserializamos id
         char auxId[20];
         memcpy(static_cast<void *>(&auxId), data, 20 * sizeof(char));
         data += 20 * sizeof(char);
+        _size += 20 * sizeof(char);
         auxId[19] = '\0';
         id = auxId;
-
+        
         //printf("id: %s\n", id.c_str());
 
         // deserializamos x
         memcpy(static_cast<void *>(&x), data, sizeof(float));
         data += sizeof(float);
+        _size += sizeof(float);
 
         // deserializamos y
         memcpy(static_cast<void *>(&y), data, sizeof(float));
         data += sizeof(float);
+        _size += sizeof(float);
 
         setPosition(x, y);
 
         // deserializamos angle
         memcpy(static_cast<void *>(&angle), data, sizeof(float));
         data += sizeof(float);
+        _size += sizeof(float);
 
         setRotation(angle);
 

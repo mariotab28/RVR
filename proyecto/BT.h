@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <vector>
+#include <SFML/Graphics.hpp>
 
 #include "Socket.h"
 
@@ -11,6 +12,7 @@ namespace sf
     class Event;
     class Color;
     class Clock;
+    class Time;
 }; // namespace sf
 
 class GameWorld;
@@ -35,7 +37,9 @@ private:
     GameWorld* world;
 
     float time;
+    float deltaTime;
     sf::Clock* clock;
+    sf::Time elapsedTime;
 
     std::vector<Socket *> clients;
     Socket socket;
@@ -58,6 +62,8 @@ public:
     void input_thread();
     void net_thread();
     //void render_thread();
+
+    void wait();
 
 private:
     sf::RenderWindow* window;

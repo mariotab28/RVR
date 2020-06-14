@@ -34,8 +34,8 @@ public:
     void setPoints(int points);
     int getPoints();
 
-    void to_bin();
-    int from_bin(char *data);
+    virtual void to_bin();
+    virtual int from_bin(char *data);
 };
 
 #endif /* PLAYER_H_ */

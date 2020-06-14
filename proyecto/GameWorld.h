@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include "BTMessage.h"
+#include <SFML/Graphics.hpp>
 
 class GameObject;
 class Player;
@@ -18,7 +19,7 @@ namespace sf
 class GameWorld : public BTMessage
 {
 private:
-    sf::Event *event;
+    sf::Event event;
 
     std::vector<GameObject *> gameObjects;
 
@@ -26,7 +27,6 @@ private:
     std::vector<sf::Font *> fonts;
 
     // test
-    Player *player;
     Player *player2;
     std::string text;
     GameObject *playerText;
