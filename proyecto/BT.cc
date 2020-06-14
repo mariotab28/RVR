@@ -132,6 +132,7 @@ void BTServer::simulate()
 
         // UPDATE WORLD
         world->update(*window);
+        
         world->getGameObjects()[0]->setRotation(
             world->getGameObjects()[0]->getRotation() + 0.1f);
 

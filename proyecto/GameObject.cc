@@ -9,9 +9,11 @@
 GameObject::GameObject(GameWorld *world, int goType)
     : BTMessage(""), world(world), goType(goType)
 {
-    MESSAGE_SIZE += sizeof(uint8_t) + sizeof(char) * 20 + sizeof(float) * 3;
+    /*MESSAGE_SIZE += sizeof(uint8_t) + sizeof(char) * 20 + sizeof(float) * 3
+     + sizeof(char) * 12;*/
 
     id = "";
+    text = "";
     x = 0;
     y = 0;
     angle = 0;
@@ -48,7 +50,10 @@ GameObject::~GameObject()
 void GameObject::setText(const std::string &text)
 {
     if (goType == 0)
+    {
+        this->text = text;
         static_cast<sf::Text *>(entity)->setString(text);
+    }
     else
         printf("ERROR: trying to setText to a non-text GO\n");
 }
@@ -176,7 +181,7 @@ void GameObject::update(sf::RenderWindow &window)
     setRotation(angle);
 }
 
-void GameObject::handleInput(sf::Event &event)
+void GameObject::handleInput(sf::Event &event, sf::RenderWindow &window)
 {
 }
 
@@ -184,7 +189,8 @@ void GameObject::to_bin()
 {
     //BTMessage::to_bin();
 
-    MESSAGE_SIZE = sizeof(uint8_t) + 20 * sizeof(char) + 3 * sizeof(float);
+    MESSAGE_SIZE = sizeof(uint8_t) + 20 * sizeof(char) + 3 * sizeof(float)
+    + 12* sizeof(char);
 
     alloc_data(MESSAGE_SIZE);
 
@@ -198,8 +204,6 @@ void GameObject::to_bin()
     memcpy(_data, static_cast<void *>((char *)id.c_str()), 20 * sizeof(char));
     _data += 20 * sizeof(char);
 
-    //printf("size id: %d\n", id.size());
-
     // serializar x
     memcpy(_data, static_cast<void *>(&x), sizeof(float));
     _data += sizeof(float);
@@ -212,6 +216,10 @@ void GameObject::to_bin()
     memcpy(_data, static_cast<void *>(&angle), sizeof(float));
     _data += sizeof(float);
 
+    // serializar text
+    memcpy(_data, static_cast<void *>((char *)text.c_str()), 12 * sizeof(char));
+    _data += 12 * sizeof(char);
+
     // colocamos el puntero al inicio del fichero
     _data -= MESSAGE_SIZE;
 }
@@ -221,11 +229,11 @@ int GameObject::from_bin(char *data)
     try
     {
         _size = 0;
+
         // deserializamos goType
         memcpy(static_cast<void *>(&goType), data, sizeof(uint8_t));
         data += sizeof(uint8_t);
         _size += sizeof(uint8_t);
-        //printf("goType: %d\n", goType);
 
         // deserializamos id
         char auxId[20];
@@ -234,8 +242,6 @@ int GameObject::from_bin(char *data)
         _size += 20 * sizeof(char);
         auxId[19] = '\0';
         id = auxId;
-        
-        //printf("id: %s\n", id.c_str());
 
         // deserializamos x
         memcpy(static_cast<void *>(&x), data, sizeof(float));
@@ -255,6 +261,17 @@ int GameObject::from_bin(char *data)
         _size += sizeof(float);
 
         setRotation(angle);
+
+        // deserializamos text
+        char auxText[12];
+        memcpy(static_cast<void *>(&auxText), data, 12 * sizeof(char));
+        data += 12 * sizeof(char);
+        _size += 12 * sizeof(char);
+        auxText[11] = '\0';
+        text = auxText;
+
+        if(goType == 0)
+            setText(text);
 
         //data -= MESSAGE_SIZE;
 

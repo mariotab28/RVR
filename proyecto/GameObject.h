@@ -36,6 +36,8 @@ protected:
     float x, y;
     float angle;
 
+    std::string text; // max 12
+
     // serializar?
     float speed;
     float dirX, dirY;
@@ -52,7 +54,7 @@ public:
 
     virtual void render(sf::RenderWindow &window);
     virtual void update(sf::RenderWindow &window);
-    virtual void handleInput(sf::Event &event);
+    virtual void handleInput(sf::Event &event, sf::RenderWindow &window);
 
     void setText(const std::string &text);
     void setTexture(const sf::Texture &texture);

@@ -54,12 +54,27 @@ void GameWorld::clientInit()
     player->setPosition(0, 0);
     player->setScale(0.5f, 0.5f);
     player->setId("Player1");
+
+    Player *player2 = new Player(this);
+    player2->setTexture(*textures[0]);
+    player2->setOrigin(player2->getTexture()->getSize().x * 0.5,
+                       player2->getTexture()->getSize().y * 0.5);
+    player2->setGunTexture(*textures[1]);
+    gameObjects.push_back(player2);
+
+    player2->setPosition(500, 200);
+    player2->setScale(0.5f, 0.5f);
+    player2->setId("Player2");
+
+    GameObject *text2 = createText(0, 20);
+    text2->setPosition(0, 0);
+    text2->setText("NULL");
 }
 
 void GameWorld::init()
 {
     // leer el highscore de un archivo!!!!
-    int highScore = 5;
+    highScore = 5;
 
     // TEST GEARS-------
 
@@ -97,7 +112,7 @@ void GameWorld::init()
 
     // PLAYER 2 TO TEST DEATH-----
 
-    /*player2 = new Player(this);
+    Player *player2 = new Player(this);
     player2->setTexture(*textures[0]);
     player2->setOrigin(player2->getTexture()->getSize().x * 0.5,
                        player2->getTexture()->getSize().y * 0.5);
@@ -110,11 +125,11 @@ void GameWorld::init()
 
     // ------CREATE TEXTS------
 
-    GameObject *text1 = createText(0, 20);
+    text1 = createText(0, 20);
     text1->setPosition(20, 60);
-    text1->setText("RANKING");
+    text1->setText("RANKING" + std::to_string(highScore));
 
-    GameObject *text2 = createText(0, 20);
+    /*GameObject *text2 = createText(0, 20);
     text2->setPosition(20, 20);
     text2->setText("HIGH SCORE: " + std::to_string(highScore));
 
@@ -203,7 +218,7 @@ void GameWorld::destroy(GameObject *go)
 void GameWorld::updateScores()
 {
     //text = "P1 POINTS: " + std::to_string(player->getPoints());
-    playerText->setText(text);
+    //playerText->setText(text);
 }
 
 void GameWorld::createGear(const sf::RenderWindow &window)
@@ -235,6 +250,10 @@ void GameWorld::update(sf::RenderWindow &window)
 {
     for (auto go : gameObjects)
         go->update(window);
+
+
+    /*highScore++;
+    text1->setText("RANKING" + std::to_string(highScore));*/
 }
 
 void GameWorld::handleInput(sf::RenderWindow &window)
@@ -246,7 +265,7 @@ void GameWorld::handleInput(sf::RenderWindow &window)
         else
         {
             for (auto go : gameObjects)
-                go->handleInput(event);
+                go->handleInput(event, window);
         }
     }
 }
@@ -279,13 +298,13 @@ void GameWorld::to_bin()
         // serializar goType
         memcpy(_data, static_cast<void *>(go->data()), go->size());
 
-        printf("go data: %c\n", _data);
+        //printf("go data: %c\n", _data);
         _data += go->size();
 
         //printf("copied go size: %d\n", go->size());
     }
 
-    printf("finished: %d\n", MESSAGE_SIZE);
+    //printf("finished: %d\n", MESSAGE_SIZE);
 
     _data -= MESSAGE_SIZE;
 
@@ -305,7 +324,7 @@ int GameWorld::from_bin(char *data)
             printf("null\n");
         else
             go->from_bin(data);
-        
+
         data += go->size();
 
         //printf("size: %d\n", go->size());

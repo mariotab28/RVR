@@ -12,8 +12,6 @@ Player::Player(GameWorld *world) : GameObject(world, 1)
     gun = new GameObject(world, 1);
     gun->setScale(0.5, 0.5);
 
-    //MESSAGE_SIZE += sizeof(uint8_t);
-
     incAngle = 0;
     mouseX = 0;
     mouseY = 0;
@@ -31,10 +29,6 @@ void Player::render(sf::RenderWindow &window)
     GameObject::render(window);
 
     gun->render(window);
-
-    // TODO: ESTO DA ERROR CUANDO SE CIERRA LA VENTANA!!
-    mouseX = sf::Mouse::getPosition(window).x;
-    mouseY = sf::Mouse::getPosition(window).y;
 }
 
 void Player::update(sf::RenderWindow &window)
@@ -45,9 +39,8 @@ void Player::update(sf::RenderWindow &window)
     angle += incAngle;
 
     // GUN UPDATE-------------
-    //gun->setPosition(x, y);
-
-    //gun->setRotation(atan2(mouseY - y, mouseX - x) * 180 / PI);
+    gun->setPosition(x, y);
+    gun->setRotation(atan2(mouseY - y, mouseX - x) * 180 / PI);
 
     // check collision with a bullet--------------
     /*std::vector<GameObject *> gameObjects = world->getGameObjects();
@@ -67,7 +60,7 @@ void Player::update(sf::RenderWindow &window)
     }*/
 }
 
-void Player::handleInput(sf::Event &event)
+void Player::handleInput(sf::Event &event, sf::RenderWindow &window)
 {
     if (event.type == sf::Event::KeyPressed)
     {
@@ -102,11 +95,14 @@ void Player::handleInput(sf::Event &event)
         printf("shoot!\n");
         shoot();
     }
+    
+    // TODO: ESTO DA ERROR CUANDO SE CIERRA LA VENTANA!!
+    mouseX = sf::Mouse::getPosition(window).x;
+    mouseY = sf::Mouse::getPosition(window).y;
 }
 
 void Player::shoot()
 {
-
     /*if (world != nullptr)
     {
         float gunAngle = gun->getRotation();
@@ -148,19 +144,13 @@ void Player::to_bin()
 {
     GameObject::to_bin();
 
-    //printf("player tobin\n");
+    gun->to_bin();
 
-    //printf("data: %s\n", data());
+    MESSAGE_SIZE += gun->size() + sizeof(uint8_t);
 
-    MESSAGE_SIZE += sizeof(uint8_t);
-
-    
     int32_t auxSize = size();
-    char *aux = (char *) malloc(auxSize);
-    //printf("size: %d\n", MESSAGE_SIZE);
+    char *aux = (char *)malloc(auxSize);
     memcpy(aux, static_cast<void *>(data()), auxSize);
-
-    //printf("aux: %s\n", aux);
 
     alloc_data(MESSAGE_SIZE);
     memset(_data, 0, MESSAGE_SIZE);
@@ -168,31 +158,32 @@ void Player::to_bin()
     memcpy(_data, static_cast<void *>(aux), auxSize);
     _data += auxSize;
 
-    //printf("_data: %s\n", _data);
-
     // serializar points
     memcpy(_data, static_cast<void *>(&points), sizeof(uint8_t));
     _data += sizeof(uint8_t);
 
-    //std::cout << "data: " << _data << "\n";
-    
+    memcpy(_data, static_cast<void *>(gun->data()), gun->size());
+    _data += gun->size();
+
     // colocamos el puntero al inicio del fichero
     _data -= MESSAGE_SIZE;
-
-    //printf("player data: %s\n", _data);
 }
 
 int Player::from_bin(char *data)
 {
     try
     {
-        //printf("size: %d\n")
         GameObject::from_bin(data);
+        data += _size;
 
         // deserializamos points
         memcpy(static_cast<void *>(&points), data, sizeof(uint8_t));
         data += sizeof(uint8_t);
         _size += sizeof(uint8_t);
+
+        gun->from_bin(data);
+        data += gun->size();
+        _size += gun->size();
 
         return 0;
     }

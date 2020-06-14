@@ -27,9 +27,12 @@ private:
     std::vector<sf::Font *> fonts;
 
     // test
-    Player *player2;
-    std::string text;
+    //Player *player2;
+    //std::string text;
+    GameObject* text1;
     GameObject *playerText;
+
+    int highScore;
 
 public:
     GameWorld();
