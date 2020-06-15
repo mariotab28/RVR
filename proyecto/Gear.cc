@@ -13,18 +13,19 @@ Gear::~Gear()
 {
 }
 
-void Gear::update(sf::RenderWindow &window)
+void Gear::update(sf::RenderWindow &window, sf::Time& elapsedTime)
 {
-    GameObject::update(window);
+    GameObject::update(window, elapsedTime);
     
     // check collision with a player--------------
-    std::vector<GameObject *> gameObjects = world->getGameObjects();
+    std::vector<GameObject *> players = world->getPlayers();
 
-    for (auto it = gameObjects.begin(); it != gameObjects.end(); ++it)
+    for (auto it = players.begin(); it != players.end(); ++it)
     {
         sf::Sprite *mySprite = getSprite();
         sf::Sprite *playerSprite = (*it)->getSprite();
         if (mySprite != nullptr && playerSprite != nullptr &&
+            (*it)->isActive() &&
             mySprite->getGlobalBounds().intersects(playerSprite->getGlobalBounds())
             && (*it)->getId().compare(0,6,"Player") == 0)
         {

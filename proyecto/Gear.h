@@ -18,7 +18,7 @@ public:
     Gear(GameWorld *world);
     virtual ~Gear();
 
-    virtual void update(sf::RenderWindow &window);
+    virtual void update(sf::RenderWindow &window, sf::Time& elapsedTime);
 
     /*virtual void render(sf::RenderWindow &window);
     virtual void update();

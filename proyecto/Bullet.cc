@@ -11,19 +11,18 @@ Bullet::~Bullet()
 {
 }
 
-void Bullet::update(sf::RenderWindow &window)
+void Bullet::update(sf::RenderWindow &window, sf::Time& elapsedTime)
 {
-    GameObject::update(window);
+    GameObject::update(window, elapsedTime);
 
     // if its out of bounds, its get destroyed
     if (x < 0 || x > window.getSize().x || y < 0 || y > window.getSize().y)
-        world->destroy(this);
+        setActive(false);//world->destroy(this);
 }
 
 void Bullet::to_bin()
 {
     GameObject::to_bin();
-
 
 }
 

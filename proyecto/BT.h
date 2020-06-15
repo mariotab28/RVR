@@ -37,7 +37,7 @@ private:
     GameWorld* world;
 
     float time;
-    float deltaTime;
+    //float deltaTime;
     sf::Clock* clock;
     sf::Time elapsedTime;
 

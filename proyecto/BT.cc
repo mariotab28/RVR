@@ -56,6 +56,9 @@ void BTServer::do_messages()
         {
             std::cout << "ERROR recv -1\n";
         }
+
+        //printf("recv\n");
+
         //std::to_string(message.type);
         //std::cout << "type: " << std::to_string(message.type) << "\n";
         //std::cout << *client << "\n";
@@ -77,12 +80,10 @@ void BTServer::do_messages()
                 // enviar mensaje de accept con index
                 BTMessage acceptMessage;
                 acceptMessage.type = BTMessage::ACCEPT;
-                acceptMessage.index = clients.size();
-
-                socket.send(acceptMessage, *clients[clients.size() - 1]);
-
-                // crear tanque del jugador
-                world->createPlayer(clients.size(), message.nick);
+                // crear tanque del jugador y asignar index
+                acceptMessage.index = world->createPlayer(message.nick);
+                if (acceptMessage.index != -1)
+                    socket.send(acceptMessage, *clients[clients.size() - 1]);
             }
 
             std::cout << "CLIENTS CONNECTED: " << clients.size() << "\n";
@@ -95,7 +96,7 @@ void BTServer::do_messages()
 
             // TODO: REORDENAR INDEX Y SETID() DE PLAYERS!!!
 
-            //int pos = 0;
+            int pos = 0;
             // buscar si existe el socket client en el vector clients
             for (auto it = clients.begin(); it != clients.end(); ++it)
             {
@@ -103,33 +104,43 @@ void BTServer::do_messages()
                 {
                     delete *it;
                     clients.erase(it);
+
+                    // destruir tanque del jugador
+                    world->removePlayer(pos);
+
                     break;
                 }
 
-                //pos++;
+                pos++;
             }
+
+            /*for (int i = 0; i < ; i++)
+            {
+                /* code */
 
             /*if(pos < clients.size())
             {
                 ;
             }*/
 
-            std::cout << "CLIENTS CONNECTED: " << clients.size() << "\n";
+            std::cout
+                << "CLIENTS CONNECTED: " << clients.size() << "\n";
 
             break;
         }
         case BTMessage::INPUT:
         {
+            // TODO: CREAR UN HILO DEDICADO A CADA CLIENTE??????
 
             // transcribir el texto del mensaje a input
-            //if (message.message.size() > 0)
-            //{
-            //printf("message: %s\n", message.message.c_str());
-            // hacer handleInput para el jugador indicado en el msg
-            //printf("index: %d\n", message.index);
+            if (message.message.size() > 0)
+            {
+                //printf("message: %s\n", message.message.c_str());
+                // hacer handleInput para el jugador indicado en el msg
+                //printf("index: %d\n", message.index);
 
-            world->processInput(message);
-            //}
+                world->processInput(message);
+            }
 
             // comprobar que el client este logeado (i.e. este en el vector
             // clients)
@@ -155,7 +166,7 @@ void BTServer::simulate()
 {
     while (true)
     {
-        //elapsedTime = clock->restart();
+        elapsedTime = clock->restart();
         //deltaTime = elapsedTime.asMilliseconds();
 
         //printf("time: %f deltaTime: %f\n", time, deltaTime);
@@ -170,7 +181,7 @@ void BTServer::simulate()
         // sacar el input de la cola
         // y evaluar
 
-        world->update(*window);
+        world->update(*window, elapsedTime);
 
         /*world->getGameObjects()[0]->setRotation(
             world->getGameObjects()[0]->getRotation() + 0.1f);
@@ -283,32 +294,34 @@ void BTClient::input_thread()
         // HANDLE INPUT
         //printf("a\n");
 
-        elapsedTime = clock->restart();
-        deltaTime = elapsedTime.asMilliseconds();
+        //elapsedTime = clock->restart();
+        //deltaTime = elapsedTime.asMilliseconds();
 
-        printf("time: %f deltaTime: %f\n", time, deltaTime);
+        //printf("time: %f deltaTime: %f\n", time, deltaTime);
 
-        if (time > 33.33f)
+        //if (time > 33.33f)
+        //{
+        //time = 0;
+
+        //printf("tick\n");
+
+        BTMessage inputMessage(nick);
+        inputMessage.type = BTMessage::INPUT;
+        inputMessage.index = index;
+
+        //printf("index: %d\n", index);
+
+        if (world->handleInput(*window, inputMessage))
         {
-            time = 0;
-
-            printf("tick\n");
-
-            BTMessage inputMessage(nick);
-            inputMessage.type = BTMessage::INPUT;
-            inputMessage.index = index;
-
-            if (world->handleInput(*window, inputMessage))
-            {
-                // SEND INPUT MESSAGES TO SERVER
-                if (socket.send(inputMessage, socket) < 0)
-                    printf("send error!\n");
-            }
+            // SEND INPUT MESSAGES TO SERVER
+            if (socket.send(inputMessage, socket) < 0)
+                printf("send error!\n");
         }
+        /*}
         else
         {
             time += deltaTime;
-        }
+        }*/
         //printf("a\n");
 
         // Leer stdin con std::getline

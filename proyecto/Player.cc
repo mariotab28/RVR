@@ -31,33 +31,37 @@ void Player::render(sf::RenderWindow &window)
     gun->render(window);
 }
 
-void Player::update(sf::RenderWindow &window)
+void Player::update(sf::RenderWindow &window, sf::Time& elapsedTime)
 {
     // BASE UPDATE-------------
-    GameObject::update(window);
+    GameObject::update(window, elapsedTime);
 
-    angle += incAngle;
+    angle += incAngle * elapsedTime.asSeconds();
 
     // GUN UPDATE-------------
     gun->setPosition(x, y);
-    gun->setRotation(atan2(mouseY - y, mouseX - x) * 180 / PI);
+    gun->setRotation(gun->getRotation() + gunIncAngle * elapsedTime.asSeconds());
+    //gun->setRotation(atan2(mouseY - y, mouseX - x) * 180 / PI);
 
     // check collision with a bullet--------------
-    /*std::vector<GameObject *> gameObjects = world->getGameObjects();
+    std::vector<GameObject *> bullets = world->getBullets();
 
-    for (auto it = gameObjects.begin(); it != gameObjects.end(); ++it)
+    for (auto it = bullets.begin(); it != bullets.end(); ++it)
     {
         sf::Sprite *mySprite = getSprite();
         sf::Sprite *bulletSprite = (*it)->getSprite();
         if (mySprite != nullptr && bulletSprite != nullptr &&
+            (*it)->isActive() &&
             mySprite->getGlobalBounds().intersects(bulletSprite->getGlobalBounds()) && (*it)->getId().compare(0, 6, "Bullet") == 0 && (*it)->getId().compare(6, 7, getId()) != 0)
         {
             printf("it->getid: %s getid: %s\n", (*it)->getId().c_str(), getId().c_str());
 
             printf("player destruido!\n");
-            world->destroy(this);
+            setActive(false);
+            (*it)->setActive(false);
+            //world->destroy(this);
         }
-    }*/
+    }
 }
 
 void Player::processInput(BTMessage message)
@@ -66,13 +70,17 @@ void Player::processInput(BTMessage message)
     {
         // MOVEMENT INPUT
         if (message.message.compare(5, 1, "D") == 0)
-            incAngle = 0.5;
+            incAngle = incSpeed;
         if (message.message.compare(5, 1, "A") == 0)
-            incAngle = -0.5;
+            incAngle = -incSpeed;
         if (message.message.compare(5, 1, "W") == 0)
-            speed = 0.3;
+            speed = incSpeed;
         if (message.message.compare(5, 1, "S") == 0)
-            speed = -0.3;
+            speed = -incSpeed;
+        if (message.message.compare(5, 1, "Q") == 0)
+            gunIncAngle = incSpeed;
+        if (message.message.compare(5, 1, "E") == 0)
+            gunIncAngle = -incSpeed;
     }
 
     if (message.message.compare(0, 5, "Relea") == 0)
@@ -85,35 +93,34 @@ void Player::processInput(BTMessage message)
             speed = 0;
         if (message.message.compare(5, 1, "S") == 0)
             speed = 0;
+        if (message.message.compare(5, 1, "Q") == 0)
+            gunIncAngle = 0;
+        if (message.message.compare(5, 1, "E") == 0)
+            gunIncAngle = 0;
     }
 
     if (message.message.compare(0, 5, "Mouse") == 0)
     {
-        printf("shoot!\n");
+        //printf("shoot!\n");
         shoot();
     }
 
     // TODO: ESTO DA ERROR CUANDO SE CIERRA LA VENTANA!!
-    mouseX = message.mouseX;
-    mouseY = message.mouseY;
+    //mouseX = message.mouseX;
+    //mouseY = message.mouseY;
 }
 
 void Player::shoot()
 {
-    /*if (world != nullptr)
+    if (world != nullptr)
     {
         float gunAngle = gun->getRotation();
 
         world->createBullet(x + cosf(gunAngle * PI / 180) * 100,
                             y + sinf(gunAngle * PI / 180) * 100,
                             gunAngle, getId());
-    }*/
+    }
     /*
-    
-    // TODO: ???
-    // coger del pool de balas
-    // si no hay ninguna desactivada, se crea una nueva
-    // EL VECTOR DE BALAS TIENE QUE TENERLO EL GAMEWORLD
     
     Bullet* b = new Bullet();
     bullets.push_back();

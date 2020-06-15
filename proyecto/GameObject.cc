@@ -184,11 +184,12 @@ void GameObject::render(sf::RenderWindow &window)
     }
 }
 
-void GameObject::update(sf::RenderWindow &window)
+void GameObject::update(sf::RenderWindow &window, sf::Time& elapsedTime)
 {
+    //printf("elapsedTime: %f\n", elapsedTime.asSeconds());
     // pos + velocity
-    x += dirX * speed;
-    y += dirY * speed;
+    x += dirX * speed * elapsedTime.asSeconds();
+    y += dirY * speed * elapsedTime.asSeconds();
     setPosition(x, y);
 
     dirX = cosf(angle * PI / 180);

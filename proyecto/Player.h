@@ -15,17 +15,21 @@ private:
     GameObject *gun;
 
     float incAngle;
+    float gunIncAngle;
     float mouseX, mouseY;
 
     // info a serializar
     uint8_t points;
 
+    // NO serializar
+    float incSpeed = 80;
+
 public:
-    Player(GameWorld* world);
+    Player(GameWorld *world);
     virtual ~Player();
 
     virtual void render(sf::RenderWindow &window);
-    virtual void update(sf::RenderWindow &window);
+    virtual void update(sf::RenderWindow &window, sf::Time& elapsedTime);
     //virtual void handleInput(sf::Event &event, sf::RenderWindow &window);
 
     void processInput(BTMessage message);

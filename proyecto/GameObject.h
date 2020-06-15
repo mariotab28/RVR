@@ -12,6 +12,7 @@ namespace sf
     class Texture;
     class Font;
     class Sprite;
+    class Time;
 }; // namespace sf
 class GameWorld;
 
@@ -55,7 +56,7 @@ public:
     virtual ~GameObject();
 
     virtual void render(sf::RenderWindow &window);
-    virtual void update(sf::RenderWindow &window);
+    virtual void update(sf::RenderWindow &window, sf::Time& elapsedTime);
     virtual void handleInput(sf::Event &event, sf::RenderWindow &window);
 
     void setText(const std::string &text);

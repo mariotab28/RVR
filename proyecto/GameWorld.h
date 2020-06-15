@@ -14,6 +14,7 @@ namespace sf
     class Texture;
     class Font;
     class Event;
+    class Time;
 }; // namespace sf
 
 class GameWorld : public BTMessage
@@ -52,7 +53,8 @@ public:
     void init();
     void createObjects();
 
-    void createPlayer(int i, const std::string& nick);
+    int createPlayer(const std::string& nick);
+    void removePlayer(int i);
 
     GameObject* getObjectFromPool(const std::vector<GameObject*>& pool);
 
@@ -60,6 +62,9 @@ public:
     GameObject *createText(int font, int characterSize);
 
     std::vector<GameObject *> getGameObjects();
+    std::vector<GameObject *> getPlayers();
+    std::vector<GameObject *> getGears();
+    std::vector<GameObject *> getBullets();
 
     bool loadTexture(const std::string &textureFilename);
     bool loadFont(const std::string &fontFilename);
@@ -72,7 +77,7 @@ public:
     void createGear(const sf::RenderWindow& window);
 
     void render(sf::RenderWindow &window);
-    void update(sf::RenderWindow &window);
+    void update(sf::RenderWindow &window, sf::Time& elapsedTime);
     bool handleInput(sf::RenderWindow &window, BTMessage& message);
 
     void processInput(BTMessage message);

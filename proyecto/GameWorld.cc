@@ -175,20 +175,45 @@ void GameWorld::init()
     playerText->setText(text);*/
 }
 
-void GameWorld::createPlayer(int i, const std::string &nick)
+int GameWorld::createPlayer(const std::string &nick)
 {
-    Player *p = static_cast<Player *>(getObjectFromPool(players));
+    int i = 0;
 
-    if (p != nullptr)
+    while (i < players.size() && players[i]->isActive())
+        i++;
+
+    if (i < players.size())
     {
-        p->setActive(true);
-        p->setPosition(400, 500);
-        p->setId("Player" + std::to_string(i));
+        Player *p = static_cast<Player *>(getObjectFromPool(players));
 
-        // crear score
+        if (p != nullptr)
+        {
+            p->setActive(true);
+            p->setPosition(400, 500);
+            p->setId("Player" + std::to_string(i));
 
-        // poner nick en score
+            // crear score
+
+            // poner nick en score
+        }
     }
+    else
+    {
+        printf("ERROR: there are no deactivated players\n");
+        i = -1;
+    }
+
+    return i;
+}
+
+void GameWorld::removePlayer(int i)
+{
+    if (players[i] != nullptr && players[i]->isActive())
+    {
+        players[i]->setActive(false);
+    }
+    else
+        printf("ERROR: trying to remove a invalid player\n");
 }
 
 GameObject *GameWorld::getObjectFromPool(const std::vector<GameObject *> &pool)
@@ -209,6 +234,21 @@ GameObject *GameWorld::getObjectFromPool(const std::vector<GameObject *> &pool)
 std::vector<GameObject *> GameWorld::getGameObjects()
 {
     return gameObjects;
+}
+
+std::vector<GameObject *> GameWorld::getPlayers()
+{
+    return players;
+}
+
+std::vector<GameObject *> GameWorld::getGears()
+{
+    return gears;
+}
+
+std::vector<GameObject *> GameWorld::getBullets()
+{
+    return bullets;
 }
 
 GameObject *GameWorld::createSprite(int texture)
@@ -252,18 +292,16 @@ bool GameWorld::loadFont(const std::string &fontFilename)
 
 void GameWorld::createBullet(float posX, float posY, float angle, std::string ownerId)
 {
-    Bullet *b = new Bullet(this);
-    b->setTexture(*textures[2]);
-    b->setScale(0.8, 0.8);
-    b->setPosition(posX, posY);
-    b->setSpeed(2);
-    b->setRotation(angle);
-    b->setOrigin(b->getTexture()->getSize().x * 0.5,
-                 b->getTexture()->getSize().y * 0.5);
-    b->setId("Bullet" + ownerId);
-    //printf("Bullet%s\n", ownerId.c_str());
+    Bullet *b = static_cast<Bullet *>(getObjectFromPool(bullets));
 
-    gameObjects.push_back(b);
+    if (b != nullptr)
+    {
+        b->setPosition(posX, posY);
+        b->setSpeed(300);
+        b->setRotation(angle);
+        b->setId("Bullet" + ownerId);
+        b->setActive(true);
+    }
 }
 
 void GameWorld::destroy(GameObject *go)
@@ -315,19 +353,19 @@ void GameWorld::render(sf::RenderWindow &window)
     }
 }
 
-void GameWorld::update(sf::RenderWindow &window)
+void GameWorld::update(sf::RenderWindow &window, sf::Time &elapsedTime)
 {
     for (auto go : gameObjects)
     {
         if (go->isActive())
-            go->update(window);
+            go->update(window, elapsedTime);
     }
 
     /*highScore++;
     text1->setText("RANKING" + std::to_string(highScore));*/
 }
 
-bool GameWorld::handleInput(sf::RenderWindow &window, BTMessage& message)
+bool GameWorld::handleInput(sf::RenderWindow &window, BTMessage &message)
 {
     bool result = false;
     while (window.pollEvent(event))
@@ -366,8 +404,18 @@ bool GameWorld::handleInput(sf::RenderWindow &window, BTMessage& message)
                 }
                 if (event.key.code == sf::Keyboard::S)
                 {
-                   message.message.append("S");
-                   result = true;
+                    message.message.append("S");
+                    result = true;
+                }
+                if (event.key.code == sf::Keyboard::Q)
+                {
+                    message.message.append("Q");
+                    result = true;
+                }
+                if (event.key.code == sf::Keyboard::E)
+                {
+                    message.message.append("E");
+                    result = true;
                 }
             }
 
@@ -394,6 +442,16 @@ bool GameWorld::handleInput(sf::RenderWindow &window, BTMessage& message)
                     message.message.append("S");
                     result = true;
                 }
+                if (event.key.code == sf::Keyboard::Q)
+                {
+                    message.message.append("Q");
+                    result = true;
+                }
+                if (event.key.code == sf::Keyboard::E)
+                {
+                    message.message.append("E");
+                    result = true;
+                }
             }
 
             if (event.type == sf::Event::MouseButtonPressed)
@@ -403,7 +461,7 @@ bool GameWorld::handleInput(sf::RenderWindow &window, BTMessage& message)
             }
 
             // TODO: ESTO DA ERROR CUANDO SE CIERRA LA VENTANA!!
-            if(mouseX != sf::Mouse::getPosition(window).x)
+            /*if(mouseX != sf::Mouse::getPosition(window).x)
             {
                 mouseX = sf::Mouse::getPosition(window).x;
                 message.mouseX = sf::Mouse::getPosition(window).x;
@@ -415,8 +473,8 @@ bool GameWorld::handleInput(sf::RenderWindow &window, BTMessage& message)
                 mouseY = sf::Mouse::getPosition(window).y;
                 message.mouseY = sf::Mouse::getPosition(window).y;
                 result = true;
-            }
-            
+            }*/
+
             //message.mouseY = sf::Mouse::getPosition(window).y;
         }
     }
@@ -427,7 +485,8 @@ bool GameWorld::handleInput(sf::RenderWindow &window, BTMessage& message)
 void GameWorld::processInput(BTMessage message)
 {
     //printf("process input index: %d\n", message.index);
-    static_cast<Player*>(players[message.index-1])->processInput(message);
+    if (players[message.index]->isActive())
+        static_cast<Player *>(players[message.index])->processInput(message);
 }
 
 void GameWorld::to_bin()
