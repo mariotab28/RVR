@@ -33,7 +33,7 @@ void BTServer::start()
     clock = new sf::Clock();
 
     world->createObjects();
-    world->init();
+    world->init(*window);
 
     printf("world initialized\n");
 }
@@ -81,7 +81,7 @@ void BTServer::do_messages()
                 BTMessage acceptMessage;
                 acceptMessage.type = BTMessage::ACCEPT;
                 // crear tanque del jugador y asignar index
-                acceptMessage.index = world->createPlayer(message.nick);
+                acceptMessage.index = world->createPlayer(message.nick, *window);
                 if (acceptMessage.index != -1)
                     socket.send(acceptMessage, *clients[clients.size() - 1]);
             }
@@ -93,8 +93,6 @@ void BTServer::do_messages()
         case BTMessage::LOGOUT:
         {
             std::cout << "LOGOUT " << *client << "\n";
-
-            // TODO: REORDENAR INDEX Y SETID() DE PLAYERS!!!
 
             int pos = 0;
             // buscar si existe el socket client en el vector clients
@@ -396,27 +394,3 @@ void BTClient::wait()
         wait();
     }
 }
-
-/*void BTClient::render_thread()
-{
-    while (window->isOpen())
-    {
-        // Clear screen
-        window->clear(*bg);
-
-        // Render
-        //world->update(*window);
-        world->render(*window);
-
-        // Update the window
-        window->display();
-    }
-
-    // TODO: METER ESTO EN METODO END() -------
-
-    delete bg;
-    delete window;
-    delete world;
-
-    // ----------------------------------------
-}*/

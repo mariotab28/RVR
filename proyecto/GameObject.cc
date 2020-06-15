@@ -5,7 +5,6 @@
 #include <math.h>
 #include <string.h>
 
-// TODO: PONER EL NICK AL QUE PERTENECE EL GAMEOBJECT
 GameObject::GameObject(GameWorld *world, int goType)
     : BTMessage(""), world(world), goType(goType)
 {

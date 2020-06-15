@@ -34,6 +34,7 @@ public:
     std::string nick; // max. 8
 
     // TODO: ESTA INFO DE INPUT TIENE QUE IR EN OTRA CLASE!!!
+    // QUITAR MOUSEX Y MOUSEY DE FROMBIN Y TOBIN
     uint8_t index;
     std::string message; // max. 12
     float mouseX;

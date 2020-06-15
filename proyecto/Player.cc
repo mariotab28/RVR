@@ -16,6 +16,7 @@ Player::Player(GameWorld *world) : GameObject(world, 1)
     mouseX = 0;
     mouseY = 0;
     points = 0;
+    nick = "";
 }
 
 Player::~Player()
@@ -31,7 +32,7 @@ void Player::render(sf::RenderWindow &window)
     gun->render(window);
 }
 
-void Player::update(sf::RenderWindow &window, sf::Time& elapsedTime)
+void Player::update(sf::RenderWindow &window, sf::Time &elapsedTime)
 {
     // BASE UPDATE-------------
     GameObject::update(window, elapsedTime);
@@ -59,7 +60,8 @@ void Player::update(sf::RenderWindow &window, sf::Time& elapsedTime)
             printf("player destruido!\n");
             setActive(false);
             (*it)->setActive(false);
-            //world->destroy(this);
+            points = 0;
+            world->createPlayer(nick, window);
         }
     }
 }
@@ -142,6 +144,16 @@ void Player::setPoints(int points)
 int Player::getPoints()
 {
     return points;
+}
+
+void Player::setNick(const std::string &nick)
+{
+    this->nick = nick;
+}
+
+std::string Player::getNick()
+{
+    return nick;
 }
 
 void Player::to_bin()

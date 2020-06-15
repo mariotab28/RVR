@@ -31,7 +31,6 @@ public:
     void simulate();
 
 private:
-    // TODO: ELIMINAR VENTANA DEL SERVER!!!!
     sf::RenderWindow* window;
     sf::Color* bg;
     GameWorld* world;

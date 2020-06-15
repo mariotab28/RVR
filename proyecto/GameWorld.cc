@@ -8,9 +8,14 @@
 #include "Bullet.h"
 #include "Gear.h"
 
+static bool sortInv(const std::pair<int,int> &a,
+               const std::pair<int,int> &b) 
+{ 
+       return (a.first > b.first); 
+}
+
 GameWorld::GameWorld() : BTMessage("")
 {
-    //type = BTMessage::OBJECT;
 }
 
 GameWorld::~GameWorld()
@@ -27,6 +32,7 @@ void GameWorld::createObjects()
 {
     for (int i = 0; i < PLAYERS_SIZE; i++)
     {
+        // players
         Player *player = new Player(this);
         gameObjects.push_back(player);
         players.push_back(player);
@@ -36,6 +42,20 @@ void GameWorld::createObjects()
                           player->getTexture()->getSize().y * 0.5);
         player->setGunTexture(*textures[1]);
         player->setScale(0.5f, 0.5f);
+
+        // scoreTexts
+        GameObject *scoreText = new GameObject(this, 0);
+        gameObjects.push_back(scoreText);
+        scoreTexts.push_back(scoreText);
+
+        scoreText->setFont(*fonts[0]);
+
+        // playerTexts
+        GameObject *playerText = new GameObject(this, 0);
+        gameObjects.push_back(playerText);
+        playerTexts.push_back(playerText);
+
+        playerText->setFont(*fonts[0]);
     }
     for (int i = 0; i < GEARS_SIZE; i++)
     {
@@ -59,6 +79,14 @@ void GameWorld::createObjects()
                           bullet->getTexture()->getSize().y * 0.5);
         bullet->setScale(0.8, 0.8);
     }
+
+    GameObject *rankingText = new GameObject(this, 0);
+    gameObjects.push_back(rankingText);
+
+    rankingText->setFont(*fonts[0]);
+    rankingText->setActive(true);
+    rankingText->setText("RANKING");
+    rankingText->setPosition(20, 10);
 
     /*Gear *g = new Gear(this);
     g->setTexture(*textures[3]);
@@ -106,21 +134,16 @@ void GameWorld::createObjects()
     text2->setText("NULL");*/
 }
 
-void GameWorld::init()
+void GameWorld::init(sf::RenderWindow &window)
 {
     // leer el highscore de un archivo!!!!
     highScore = 5;
 
     // TEST GEARS-------
 
-    Gear *g = static_cast<Gear *>(getObjectFromPool(gears));
-
-    if (g != nullptr)
+    for (int i = 0; i < initialGears; i++)
     {
-        //= new Gear(this);
-        g->setActive(true);
-        g->setPosition(20, 500);
-        g->setId("Gear1");
+        createGear(window);
     }
 
     /*Gear *g2 = new Gear(this);
@@ -175,7 +198,7 @@ void GameWorld::init()
     playerText->setText(text);*/
 }
 
-int GameWorld::createPlayer(const std::string &nick)
+int GameWorld::createPlayer(const std::string &nick, sf::RenderWindow &window)
 {
     int i = 0;
 
@@ -188,13 +211,44 @@ int GameWorld::createPlayer(const std::string &nick)
 
         if (p != nullptr)
         {
+            bool generate = false;
+            do
+            {
+                p->setPosition(rand() % window.getSize().x, rand() % window.getSize().y);
+
+                generate = false;
+
+                // check collision with a player--------------
+                std::vector<GameObject *> players = getPlayers();
+
+                for (auto it = players.begin(); it != players.end(); ++it)
+                {
+                    sf::Sprite *mySprite = p->getSprite();
+                    sf::Sprite *playerSprite = (*it)->getSprite();
+                    if (mySprite != nullptr && playerSprite != nullptr &&
+                        (*it)->isActive() &&
+                        mySprite->getGlobalBounds().intersects(playerSprite->getGlobalBounds()) &&
+                        (*it)->getId().compare(0, 6, "Player") == 0)
+                    {
+                        generate = true;
+                    }
+                }
+            } while (generate);
+
             p->setActive(true);
-            p->setPosition(400, 500);
             p->setId("Player" + std::to_string(i));
+            p->setNick(nick);
 
-            // crear score
+            // player text
+            playerTexts[i]->setActive(true);
+            playerTexts[i]->setText("P" + std::to_string(i + 1));
 
-            // poner nick en score
+            // score
+            scoreTexts[i]->setActive(true);
+            //scoreTexts[i]->setText("P" + std::to_string(i) + " " + nick + " 0");
+            // pos Y
+
+            updateScoreTexts();
         }
     }
     else
@@ -211,6 +265,12 @@ void GameWorld::removePlayer(int i)
     if (players[i] != nullptr && players[i]->isActive())
     {
         players[i]->setActive(false);
+        static_cast<Player*>(players[i])->setPoints(0);
+        playerTexts[i]->setActive(false);
+
+        scoreTexts[i]->setActive(false);
+
+        updateScoreTexts();
     }
     else
         printf("ERROR: trying to remove a invalid player\n");
@@ -251,24 +311,6 @@ std::vector<GameObject *> GameWorld::getBullets()
     return bullets;
 }
 
-GameObject *GameWorld::createSprite(int texture)
-{
-    GameObject *go = new GameObject(this, 1);
-    go->setTexture(*textures[texture]);
-
-    gameObjects.push_back(go);
-    return go;
-}
-
-GameObject *GameWorld::createText(int font, int characterSize)
-{
-    GameObject *go = new GameObject(this, 0);
-    go->setFont(*fonts[font]);
-    //go->setCharacterSize(characterSize);
-    gameObjects.push_back(go);
-    return go;
-}
-
 bool GameWorld::loadTexture(const std::string &textureFilename)
 {
     sf::Texture *texture = new sf::Texture();
@@ -304,44 +346,82 @@ void GameWorld::createBullet(float posX, float posY, float angle, std::string ow
     }
 }
 
-void GameWorld::destroy(GameObject *go)
+void GameWorld::updateScoreTexts()
 {
-    //find gameObject and destroys it
-    auto it = std::find(gameObjects.begin(), gameObjects.end(), go);
-    if (it != gameObjects.end())
-    {
-        delete *it;
-        gameObjects.erase(it);
-    }
-    else
-    {
-        printf("ERROR: trying to destroy a GO that doesn't exist\n");
-    }
-}
 
-void GameWorld::updateScores()
-{
+    // crear aux <points, index>
+    std::vector<std::pair<int, int>> aux;
+
+    // inicializo aux
+    for (int i = 0; i < players.size(); i++)
+    {
+        if (players[i]->isActive())
+        {
+            aux.push_back({static_cast<Player *>(players[i])->getPoints(),
+                           i});
+            scoreTexts[i]->setText("P" + std::to_string(i+1) + " " + static_cast<Player *>(players[i])->getNick() + 
+            " " + std::to_string(static_cast<Player *>(players[i])->getPoints()));
+        }
+    }
+
+    // ordeno aux
+    std::sort(aux.begin(), aux.end(), sortInv);
+
+    // recorro aux
+    for (int j = 0; j < aux.size(); j++)
+    {
+        scoreTexts[aux[j].second]->setPosition(10, 40 + j*50 + 20);
+    }
+    
+
+
     //text = "P1 POINTS: " + std::to_string(player->getPoints());
     //playerText->setText(text);
 }
 
+void GameWorld::updatePlayerTexts()
+{
+    for (int i = 0; i < playerTexts.size(); i++)
+    {
+        if (players[i]->isActive())
+        {
+            playerTexts[i]->setPosition(players[i]->getX() - 20, players[i]->getY() - 100);
+        }
+    }
+}
+
 void GameWorld::createGear(const sf::RenderWindow &window)
 {
-    Gear *g = new Gear(this);
-    g->setTexture(*textures[3]);
-    g->setScale(0.8, 0.8);
-    g->setOrigin(g->getTexture()->getSize().x * 0.5,
-                 g->getTexture()->getSize().y * 0.5);
+    Gear *g = static_cast<Gear *>(getObjectFromPool(gears));
 
-    g->setPosition(rand() % window.getSize().x, rand() % window.getSize().y);
+    if (g != nullptr)
+    {
+        g->setActive(true);
 
-    // TODO: SI EL GEAR SE CREA EN UNA POSICION
-    // DONDE YA HAY ALGO SE VUELVE A HACER EL RANDOM
-    /*sf::Sprite *mySprite = getSprite();
-    sf::Sprite *otherSprite = (*it)->getSprite();
-    if(mySprite->getGlobalBounds().intersects(otherSprite->getGlobalBounds())*/
+        bool generate = false;
 
-    gameObjects.push_back(g);
+        do
+        {
+            g->setPosition(rand() % window.getSize().x, rand() % window.getSize().y);
+
+            generate = false;
+
+            // check collision with a player--------------
+            std::vector<GameObject *> players = getPlayers();
+
+            for (auto it = players.begin(); it != players.end(); ++it)
+            {
+                sf::Sprite *mySprite = g->getSprite();
+                sf::Sprite *playerSprite = (*it)->getSprite();
+                if (mySprite != nullptr && playerSprite != nullptr &&
+                    (*it)->isActive() &&
+                    mySprite->getGlobalBounds().intersects(playerSprite->getGlobalBounds()) && (*it)->getId().compare(0, 6, "Player") == 0)
+                {
+                    generate = true;
+                }
+            }
+        } while (generate);
+    }
 }
 
 void GameWorld::render(sf::RenderWindow &window)
@@ -360,6 +440,9 @@ void GameWorld::update(sf::RenderWindow &window, sf::Time &elapsedTime)
         if (go->isActive())
             go->update(window, elapsedTime);
     }
+
+    updatePlayerTexts();
+    //updateScoreTexts();
 
     /*highScore++;
     text1->setText("RANKING" + std::to_string(highScore));*/

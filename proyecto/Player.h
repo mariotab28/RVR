@@ -23,6 +23,7 @@ private:
 
     // NO serializar
     float incSpeed = 80;
+    std::string nick;
 
 public:
     Player(GameWorld *world);
@@ -39,6 +40,8 @@ public:
 
     void setPoints(int points);
     int getPoints();
+    void setNick(const std::string& nick);
+    std::string getNick();
 
     virtual void to_bin();
     virtual int from_bin(char *data);
