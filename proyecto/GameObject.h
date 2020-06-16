@@ -37,7 +37,7 @@ protected:
     float x, y;
     float angle;
 
-    std::string text; // max 12
+    std::string text; // max 16
 
     bool active;
 

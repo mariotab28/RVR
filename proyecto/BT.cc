@@ -25,6 +25,7 @@ void BTServer::start()
     world->loadTexture("assets/tankGun.png");
     world->loadTexture("assets/bullet.png");
     world->loadTexture("assets/gear.png");
+    world->loadTexture("assets/wall.png");
 
     world->loadFont("assets/arial.ttf");
 
@@ -33,7 +34,7 @@ void BTServer::start()
     clock = new sf::Clock();
 
     world->createObjects();
-    world->init(*window);
+    world->init(*window, 0);
 
     printf("world initialized\n");
 }
@@ -249,6 +250,7 @@ void BTClient::start()
     world->loadTexture("assets/tankGun.png");
     world->loadTexture("assets/bullet.png");
     world->loadTexture("assets/gear.png");
+    world->loadTexture("assets/wall.png");
 
     world->loadFont("assets/arial.ttf");
 

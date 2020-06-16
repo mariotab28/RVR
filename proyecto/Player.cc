@@ -10,7 +10,7 @@
 Player::Player(GameWorld *world) : GameObject(world, 1)
 {
     gun = new GameObject(world, 1);
-    gun->setScale(0.5, 0.5);
+    gun->setScale(0.4, 0.4);
 
     incAngle = 0;
     mouseX = 0;
@@ -34,15 +34,18 @@ void Player::render(sf::RenderWindow &window)
 
 void Player::update(sf::RenderWindow &window, sf::Time &elapsedTime)
 {
-    // BASE UPDATE-------------
-    GameObject::update(window, elapsedTime);
-
     angle += incAngle * elapsedTime.asSeconds();
 
     // GUN UPDATE-------------
     gun->setPosition(x, y);
     gun->setRotation(gun->getRotation() + gunIncAngle * elapsedTime.asSeconds());
     //gun->setRotation(atan2(mouseY - y, mouseX - x) * 180 / PI);
+
+    int factor = reverse ? -1 : 1;
+
+    dirX = factor * cosf(angle * PI / 180);
+    dirY = factor * sinf(angle * PI / 180);
+    setRotation(angle);
 
     // check collision with a bullet--------------
     std::vector<GameObject *> bullets = world->getBullets();
@@ -64,6 +67,64 @@ void Player::update(sf::RenderWindow &window, sf::Time &elapsedTime)
             world->createPlayer(nick, window);
         }
     }
+
+    // check collision with a wall--------------------
+    std::vector<GameObject *> walls = world->getWalls();
+
+    for (auto it = walls.begin(); it != walls.end(); ++it)
+    {
+        sf::Sprite *mySprite = getSprite();
+        sf::Sprite *wallSprite = (*it)->getSprite();
+        if (mySprite != nullptr && wallSprite != nullptr &&
+            (*it)->isActive() &&
+            mySprite->getGlobalBounds().intersects(wallSprite->getGlobalBounds()) && (*it)->getId().compare(0, 4, "Wall") == 0)
+        {
+            // calculate distance
+            std::pair<float, float> dir = {getX() - (*it)->getX(), getY() - (*it)->getY()};
+
+            float bulletWidth = mySprite->getTexture()->getSize().x * mySprite->getScale().x;
+            float bulletHeight = mySprite->getTexture()->getSize().y * mySprite->getScale().y;
+            float wallWidth = wallSprite->getTexture()->getSize().x * wallSprite->getScale().x;
+            float wallHeight = wallSprite->getTexture()->getSize().y * wallSprite->getScale().y;
+
+            float width = (bulletWidth + wallWidth) / 2;
+            float height = (bulletHeight + wallHeight) / 2;
+            float crossWidth = width * dir.second;
+            float crossHeight = height * dir.first;
+            std::string collision = "none";
+
+            if (abs(dir.first) <= width && abs(dir.second) <= height)
+            {
+                if (crossWidth > crossHeight)
+                    collision = (crossWidth > (-crossHeight)) ? "bottom" : "left";
+                else
+                    collision = (crossWidth > -(crossHeight)) ? "right" : "top";
+            }
+
+            if ((collision == "top" && dirY > 0) || (collision == "bottom" && dirY < 0))
+                speed = 0;
+            else if ((collision == "right" && dirX < 0) || (collision == "left" && dirX > 0))
+                speed = 0;
+            else
+                break;
+
+            // normalize
+            /*float magnitude = sqrt(dirX * dirX + dirY * dirY);
+            dirX /= magnitude;
+            dirY /= magnitude;
+
+            angle = atan2(dirY, dirX) * 180 / PI;*/
+
+            break;
+        }
+    }
+
+    // BASE UPDATE-------------
+    //GameObject::update(window, elapsedTime);
+
+    x += dirX * speed * elapsedTime.asSeconds();
+    y += dirY * speed * elapsedTime.asSeconds();
+    setPosition(x, y);
 }
 
 void Player::processInput(BTMessage message)
@@ -72,17 +133,31 @@ void Player::processInput(BTMessage message)
     {
         // MOVEMENT INPUT
         if (message.message.compare(5, 1, "D") == 0)
-            incAngle = incSpeed;
+            incAngle = incAngleSpeed;
         if (message.message.compare(5, 1, "A") == 0)
-            incAngle = -incSpeed;
+            incAngle = -incAngleSpeed;
         if (message.message.compare(5, 1, "W") == 0)
+        {
             speed = incSpeed;
+
+            if (reverse)
+            {
+                reverse = false;
+            }
+        }
         if (message.message.compare(5, 1, "S") == 0)
-            speed = -incSpeed;
+        {
+            speed = incSpeed;
+
+            if (!reverse)
+            {
+                reverse = true;
+            }
+        }
         if (message.message.compare(5, 1, "Q") == 0)
-            gunIncAngle = incSpeed;
+            gunIncAngle = incAngleSpeed;
         if (message.message.compare(5, 1, "E") == 0)
-            gunIncAngle = -incSpeed;
+            gunIncAngle = -incAngleSpeed;
     }
 
     if (message.message.compare(0, 5, "Relea") == 0)
@@ -118,8 +193,8 @@ void Player::shoot()
     {
         float gunAngle = gun->getRotation();
 
-        world->createBullet(x + cosf(gunAngle * PI / 180) * 100,
-                            y + sinf(gunAngle * PI / 180) * 100,
+        world->createBullet(x + cosf(gunAngle * PI / 180) * 70,
+                            y + sinf(gunAngle * PI / 180) * 70,
                             gunAngle, getId());
     }
     /*

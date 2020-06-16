@@ -20,10 +20,12 @@ namespace sf
 class GameWorld : public BTMessage
 {
 private:
-    // 8 players, 1 gear, 50 bullets, 
+    // 8 players, 1 gear, 50 bullets, 10 walls, 8 playertexts, 8 scoretexts
     int PLAYERS_SIZE = 8;
     int GEARS_SIZE = 1;
     int BULLETS_SIZE = 50;
+    int WALLS_SIZE = 10;
+
     int initialGears = 1;
 
     sf::Event event;
@@ -33,9 +35,11 @@ private:
     std::vector<GameObject *> players;
     std::vector<GameObject *> gears;
     std::vector<GameObject *> bullets;
+    std::vector<GameObject *> walls;
     std::vector<GameObject *> playerTexts;
     std::vector<GameObject *> scoreTexts;
-    GameObject* rankingText;
+
+    GameObject *highscoreText;
 
     std::vector<sf::Texture *> textures;
     std::vector<sf::Font *> fonts;
@@ -47,12 +51,13 @@ private:
     GameObject *playerText;
 
     int highScore;
+    std::string highScoreNick;
 
 public:
     GameWorld();
     ~GameWorld();
 
-    void init(sf::RenderWindow& window);
+    void init(sf::RenderWindow& window, int level);
     void createObjects();
 
     int createPlayer(const std::string& nick, sf::RenderWindow& window);
@@ -64,6 +69,7 @@ public:
     std::vector<GameObject *> getPlayers();
     std::vector<GameObject *> getGears();
     std::vector<GameObject *> getBullets();
+    std::vector<GameObject *> getWalls();
 
     bool loadTexture(const std::string &textureFilename);
     bool loadFont(const std::string &fontFilename);

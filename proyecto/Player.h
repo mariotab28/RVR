@@ -16,14 +16,16 @@ private:
 
     float incAngle;
     float gunIncAngle;
-    float mouseX, mouseY;
+    //float mouseX, mouseY;
 
     // info a serializar
     uint8_t points;
 
     // NO serializar
     float incSpeed = 80;
+    float incAngleSpeed = 110;
     std::string nick;
+    bool reverse = false;
 
 public:
     Player(GameWorld *world);

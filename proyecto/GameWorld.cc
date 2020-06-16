@@ -3,15 +3,17 @@
 #include "GameObject.h"
 #include <SFML/Graphics.hpp>
 
+#include <fstream>
+
 #include "GameObject.h"
 #include "Player.h"
 #include "Bullet.h"
 #include "Gear.h"
 
-static bool sortInv(const std::pair<int,int> &a,
-               const std::pair<int,int> &b) 
-{ 
-       return (a.first > b.first); 
+static bool sortInv(const std::pair<int, int> &a,
+                    const std::pair<int, int> &b)
+{
+    return (a.first > b.first);
 }
 
 GameWorld::GameWorld() : BTMessage("")
@@ -41,7 +43,7 @@ void GameWorld::createObjects()
         player->setOrigin(player->getTexture()->getSize().x * 0.5,
                           player->getTexture()->getSize().y * 0.5);
         player->setGunTexture(*textures[1]);
-        player->setScale(0.5f, 0.5f);
+        player->setScale(0.4f, 0.4f);
 
         // scoreTexts
         GameObject *scoreText = new GameObject(this, 0);
@@ -66,7 +68,7 @@ void GameWorld::createObjects()
         gear->setTexture(*textures[3]);
         gear->setOrigin(gear->getTexture()->getSize().x * 0.5,
                         gear->getTexture()->getSize().y * 0.5);
-        gear->setScale(0.8, 0.8);
+        gear->setScale(0.4, 0.4);
     }
     for (int i = 0; i < BULLETS_SIZE; i++)
     {
@@ -77,7 +79,20 @@ void GameWorld::createObjects()
         bullet->setTexture(*textures[2]);
         bullet->setOrigin(bullet->getTexture()->getSize().x * 0.5,
                           bullet->getTexture()->getSize().y * 0.5);
-        bullet->setScale(0.8, 0.8);
+        bullet->setScale(0.7, 0.5);
+    }
+
+    for (int i = 0; i < WALLS_SIZE; i++)
+    {
+        GameObject *w = new GameObject(this, 1);
+        gameObjects.push_back(w);
+        walls.push_back(w);
+
+        w->setTexture(*textures[4]);
+        w->setOrigin(w->getTexture()->getSize().x * 0.5,
+                     w->getTexture()->getSize().y * 0.5);
+        w->setScale(300, 200);
+        w->setId("Wall");
     }
 
     GameObject *rankingText = new GameObject(this, 0);
@@ -86,7 +101,22 @@ void GameWorld::createObjects()
     rankingText->setFont(*fonts[0]);
     rankingText->setActive(true);
     rankingText->setText("RANKING");
-    rankingText->setPosition(20, 10);
+    rankingText->setPosition(15, 70);
+
+    GameObject *highscoreTitleText = new GameObject(this, 0);
+    gameObjects.push_back(highscoreTitleText);
+
+    highscoreTitleText->setFont(*fonts[0]);
+    highscoreTitleText->setActive(true);
+    highscoreTitleText->setText("HIGHSCORE");
+    highscoreTitleText->setPosition(15, 5);
+
+    highscoreText = new GameObject(this, 0);
+    gameObjects.push_back(highscoreText);
+
+    highscoreText->setFont(*fonts[0]);
+    highscoreText->setActive(true);
+    highscoreText->setPosition(15, 30);
 
     /*Gear *g = new Gear(this);
     g->setTexture(*textures[3]);
@@ -134,16 +164,46 @@ void GameWorld::createObjects()
     text2->setText("NULL");*/
 }
 
-void GameWorld::init(sf::RenderWindow &window)
+void GameWorld::init(sf::RenderWindow &window, int level)
 {
-    // leer el highscore de un archivo!!!!
-    highScore = 5;
+    // read highscore data from the file "data.txt"
+    std::ifstream file;
+    file.open("data.txt");
+
+    if (file.is_open())
+    {
+        file >> highScoreNick >> highScore;
+        file.close();
+    }
+    printf("%s: %d\n", highScoreNick.c_str(), highScore);
+
+    highscoreText->setText(highScoreNick + ": " + std::to_string(highScore));
 
     // TEST GEARS-------
 
     for (int i = 0; i < initialGears; i++)
     {
         createGear(window);
+    }
+
+    switch (level)
+    {
+    case 0:
+    {
+        GameObject *w = getObjectFromPool(walls);
+        w->setPosition(300, 300);
+        w->setActive(true);
+
+        break;
+    }
+
+    case 1:
+    {
+        break;
+    }
+
+    default:
+        break;
     }
 
     /*Gear *g2 = new Gear(this);
@@ -265,7 +325,7 @@ void GameWorld::removePlayer(int i)
     if (players[i] != nullptr && players[i]->isActive())
     {
         players[i]->setActive(false);
-        static_cast<Player*>(players[i])->setPoints(0);
+        static_cast<Player *>(players[i])->setPoints(0);
         playerTexts[i]->setActive(false);
 
         scoreTexts[i]->setActive(false);
@@ -311,6 +371,11 @@ std::vector<GameObject *> GameWorld::getBullets()
     return bullets;
 }
 
+std::vector<GameObject *> GameWorld::getWalls()
+{
+    return walls;
+}
+
 bool GameWorld::loadTexture(const std::string &textureFilename)
 {
     sf::Texture *texture = new sf::Texture();
@@ -339,7 +404,7 @@ void GameWorld::createBullet(float posX, float posY, float angle, std::string ow
     if (b != nullptr)
     {
         b->setPosition(posX, posY);
-        b->setSpeed(300);
+        b->setSpeed(500);
         b->setRotation(angle);
         b->setId("Bullet" + ownerId);
         b->setActive(true);
@@ -348,7 +413,6 @@ void GameWorld::createBullet(float posX, float posY, float angle, std::string ow
 
 void GameWorld::updateScoreTexts()
 {
-
     // crear aux <points, index>
     std::vector<std::pair<int, int>> aux;
 
@@ -359,8 +423,8 @@ void GameWorld::updateScoreTexts()
         {
             aux.push_back({static_cast<Player *>(players[i])->getPoints(),
                            i});
-            scoreTexts[i]->setText("P" + std::to_string(i+1) + " " + static_cast<Player *>(players[i])->getNick() + 
-            " " + std::to_string(static_cast<Player *>(players[i])->getPoints()));
+            scoreTexts[i]->setText("P" + std::to_string(i + 1) + " " + static_cast<Player *>(players[i])->getNick() +
+                                   " " + std::to_string(static_cast<Player *>(players[i])->getPoints()));
         }
     }
 
@@ -370,13 +434,27 @@ void GameWorld::updateScoreTexts()
     // recorro aux
     for (int j = 0; j < aux.size(); j++)
     {
-        scoreTexts[aux[j].second]->setPosition(10, 40 + j*50 + 20);
+        scoreTexts[aux[j].second]->setPosition(14, 100 + j * 30);
     }
-    
 
+    // update highscore
+    if (aux.size() > 0 && highScore < aux[0].first)
+    {
+        highScore = aux[0].first;
+        highScoreNick = static_cast<Player *>(players[aux[0].second])->getNick();
 
-    //text = "P1 POINTS: " + std::to_string(player->getPoints());
-    //playerText->setText(text);
+        std::ofstream file;
+        file.open("data.txt");
+
+        if (file.is_open())
+        {
+            file << highScoreNick << " " << highScore;
+            file.close();
+        }
+        //printf("%s: %d\n", highScoreNick.c_str(), highScore);
+
+        highscoreText->setText(highScoreNick + ": " + std::to_string(highScore));
+    }
 }
 
 void GameWorld::updatePlayerTexts()

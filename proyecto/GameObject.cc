@@ -205,7 +205,7 @@ void GameObject::to_bin()
     //BTMessage::to_bin();
 
     MESSAGE_SIZE = sizeof(uint8_t) + 20 * sizeof(char) + 
-    3 * sizeof(float) + 12 * sizeof(char) + sizeof(bool);
+    3 * sizeof(float) + 16 * sizeof(char) + sizeof(bool);
 
     alloc_data(MESSAGE_SIZE);
 
@@ -232,8 +232,8 @@ void GameObject::to_bin()
     _data += sizeof(float);
 
     // serializar text
-    memcpy(_data, static_cast<void *>((char *)text.c_str()), 12 * sizeof(char));
-    _data += 12 * sizeof(char);
+    memcpy(_data, static_cast<void *>((char *)text.c_str()), 16 * sizeof(char));
+    _data += 16 * sizeof(char);
 
     // serializar active
     memcpy(_data, static_cast<void *>(&active), sizeof(bool));
@@ -282,11 +282,11 @@ int GameObject::from_bin(char *data)
         setRotation(angle);
 
         // deserializamos text
-        char auxText[12];
-        memcpy(static_cast<void *>(&auxText), data, 12 * sizeof(char));
-        data += 12 * sizeof(char);
-        _size += 12 * sizeof(char);
-        auxText[11] = '\0';
+        char auxText[16];
+        memcpy(static_cast<void *>(&auxText), data, 16 * sizeof(char));
+        data += 16 * sizeof(char);
+        _size += 16 * sizeof(char);
+        auxText[15] = '\0';
         text = auxText;
 
         if (goType == 0)
