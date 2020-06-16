@@ -36,10 +36,13 @@ void Player::update(sf::RenderWindow &window, sf::Time &elapsedTime)
 {
     angle += incAngle * elapsedTime.asSeconds();
 
+    // update cooldown
+    if (time > 0)
+        time -= elapsedTime.asSeconds();
+
     // GUN UPDATE-------------
     gun->setPosition(x, y);
     gun->setRotation(gun->getRotation() + gunIncAngle * elapsedTime.asSeconds());
-    //gun->setRotation(atan2(mouseY - y, mouseX - x) * 180 / PI);
 
     int factor = reverse ? -1 : 1;
 
@@ -141,18 +144,14 @@ void Player::processInput(BTMessage message)
             speed = incSpeed;
 
             if (reverse)
-            {
                 reverse = false;
-            }
         }
         if (message.message.compare(5, 1, "S") == 0)
         {
             speed = incSpeed;
 
             if (!reverse)
-            {
                 reverse = true;
-            }
         }
         if (message.message.compare(5, 1, "Q") == 0)
             gunIncAngle = incAngleSpeed;
@@ -178,8 +177,11 @@ void Player::processInput(BTMessage message)
 
     if (message.message.compare(0, 5, "Mouse") == 0)
     {
-        //printf("shoot!\n");
-        shoot();
+        if (time <= 0)
+        {
+            shoot();
+            time = cooldown;
+        }
     }
 
     // TODO: ESTO DA ERROR CUANDO SE CIERRA LA VENTANA!!
@@ -197,11 +199,6 @@ void Player::shoot()
                             y + sinf(gunAngle * PI / 180) * 70,
                             gunAngle, getId());
     }
-    /*
-    
-    Bullet* b = new Bullet();
-    bullets.push_back();
-    */
 }
 
 void Player::setGunTexture(sf::Texture &texture)

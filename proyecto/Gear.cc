@@ -16,7 +16,7 @@ Gear::~Gear()
 void Gear::update(sf::RenderWindow &window, sf::Time& elapsedTime)
 {
     GameObject::update(window, elapsedTime);
-    
+
     // check collision with a player--------------
     std::vector<GameObject *> players = world->getPlayers();
 

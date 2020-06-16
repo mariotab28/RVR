@@ -1,6 +1,7 @@
 #include <string>
 #include <unistd.h>
 #include <string.h>
+#include <sstream>
 #include <vector>
 #include <SFML/Graphics.hpp>
 
@@ -15,7 +16,7 @@ namespace sf
     class Time;
 }; // namespace sf
 
-// TODO: SI SE CIERRA EL SERVER, SE TIENE QUE ENVIAR UN MENSAJE A TODOS LOS+
+// TODO: SI SE CIERRA EL SERVER, SE TIENE QUE ENVIAR UN MENSAJE A TODOS LOS
 // CLIENTES PARA QUE SE CIERREN ANTES
 
 class GameWorld;
@@ -23,9 +24,16 @@ class GameWorld;
 class BTServer
 {
 public:
-    BTServer(const char *s, const char *p) : socket(s, p)
+    BTServer(const char *s, const char *p, const char *l) : socket(s, p)
     {
         socket.bind();
+        if (l != nullptr)
+        {
+            std::stringstream ss(l);
+            ss >> level;
+        }
+        else
+            printf("ATENCION: Ningún nivel elegido!\nEscribir 0,1,2 como 3º arg para elegir el nivel\n");
     };
 
     void start();
@@ -34,14 +42,14 @@ public:
     void simulate();
 
 private:
-    sf::RenderWindow* window;
-    sf::Color* bg;
-    GameWorld* world;
+    sf::RenderWindow *window;
+    sf::Color *bg;
+    GameWorld *world;
 
     float time;
-    //float deltaTime;
-    sf::Clock* clock;
+    sf::Clock *clock;
     sf::Time elapsedTime;
+    int level;
 
     std::vector<Socket *> clients;
     Socket socket;
@@ -67,10 +75,10 @@ public:
     void wait();
 
 private:
-    sf::RenderWindow* window;
-    sf::Color* bg;
+    sf::RenderWindow *window;
+    sf::Color *bg;
 
-    GameWorld* world;
+    GameWorld *world;
 
     Socket socket;
     std::string nick;
@@ -79,6 +87,6 @@ private:
 
     float time;
     float deltaTime;
-    sf::Clock* clock;
+    sf::Clock *clock;
     sf::Time elapsedTime;
 };

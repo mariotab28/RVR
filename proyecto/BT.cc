@@ -33,8 +33,10 @@ void BTServer::start()
 
     clock = new sf::Clock();
 
+    printf("%d\n",level);
+
     world->createObjects();
-    world->init(*window, 0);
+    world->init(*window, level);
 
     printf("world initialized\n");
 }

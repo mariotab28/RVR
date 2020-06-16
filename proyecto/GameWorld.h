@@ -22,11 +22,13 @@ class GameWorld : public BTMessage
 private:
     // 8 players, 1 gear, 50 bullets, 10 walls, 8 playertexts, 8 scoretexts
     int PLAYERS_SIZE = 8;
-    int GEARS_SIZE = 1;
+    int GEARS_SIZE = 2;
     int BULLETS_SIZE = 50;
     int WALLS_SIZE = 10;
 
-    int initialGears = 1;
+    int initialGears = 2;
+
+    int leftX = 200;
 
     sf::Event event;
 
@@ -47,8 +49,6 @@ private:
     // test
     //Player *player2;
     //std::string text;
-    GameObject* text1;
-    GameObject *playerText;
 
     int highScore;
     std::string highScoreNick;
@@ -62,6 +62,8 @@ public:
 
     int createPlayer(const std::string& nick, sf::RenderWindow& window);
     void removePlayer(int i);
+
+    void createWall(const std::pair<float, float>& pos, const std::pair<float, float>& scale);
 
     GameObject* getObjectFromPool(const std::vector<GameObject*>& pool);
 

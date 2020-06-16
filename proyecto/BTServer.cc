@@ -17,12 +17,14 @@ void _server_thread(BTServer* es)
 
 int main(int argc, char **argv)
 {
+    srand (time(NULL));
+
     XInitThreads();
 
     sigset_t waitset;
     int      sig;
 
-    BTServer es(argv[1], argv[2]);
+    BTServer es(argv[1], argv[2], argv[3]);
 
     es.start();
 

@@ -6,6 +6,8 @@
 
 Bullet::Bullet(GameWorld *world) : GameObject(world, 1)
 {
+    maxBounces = 3;
+    resetBounces();
 }
 
 Bullet::~Bullet()
@@ -29,7 +31,7 @@ void Bullet::update(sf::RenderWindow &window, sf::Time &elapsedTime)
         {
             // calculate distance
             std::pair<float, float> dir = {getX() - (*it)->getX(), getY() - (*it)->getY()};
-            
+
             float bulletWidth = mySprite->getTexture()->getSize().x * mySprite->getScale().x;
             float bulletHeight = mySprite->getTexture()->getSize().y * mySprite->getScale().y;
             float wallWidth = wallSprite->getTexture()->getSize().x * wallSprite->getScale().x;
@@ -50,9 +52,17 @@ void Bullet::update(sf::RenderWindow &window, sf::Time &elapsedTime)
             }
 
             if ((collision == "top" && dirY > 0) || (collision == "bottom" && dirY < 0))
+            {
                 dirY *= -1;
+                if (checkBounces())
+                    return;
+            }
             else if ((collision == "right" && dirX < 0) || (collision == "left" && dirX > 0))
+            {
                 dirX *= -1;
+                if (checkBounces())
+                    return;
+            }
             else
                 break;
 
@@ -69,7 +79,24 @@ void Bullet::update(sf::RenderWindow &window, sf::Time &elapsedTime)
 
     // if its out of bounds, its get destroyed
     if (x < 0 || x > window.getSize().x || y < 0 || y > window.getSize().y)
-        setActive(false); //world->destroy(this);
+        setActive(false);
+}
+
+bool Bullet::checkBounces()
+{
+    nBounces--;
+    if (nBounces <= 0)
+    {
+        setActive(false);
+        return true;
+    }
+
+    return false;
+}
+
+void Bullet::resetBounces()
+{
+    nBounces = maxBounces;
 }
 
 void Bullet::to_bin()

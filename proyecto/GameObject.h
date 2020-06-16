@@ -40,6 +40,8 @@ protected:
     std::string text; // max 16
 
     bool active;
+    float scaleX;
+    float scaleY;
 
     // serializar?
     float speed;
@@ -49,9 +51,6 @@ protected:
     GameWorld *world;
 
 public:
-    /*size_t MESSAGE_SIZE =
-        sizeof(uint8_t) + sizeof(char)*20 + sizeof(float)*3;*/
-
     GameObject(GameWorld *world, int goType);
     virtual ~GameObject();
 

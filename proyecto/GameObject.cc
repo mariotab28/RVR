@@ -20,6 +20,8 @@ GameObject::GameObject(GameWorld *world, int goType)
     dirX = 0;
     dirY = 0;
     active = false;
+    scaleX = 1;
+    scaleY = 1;
 
     switch (goType)
     {
@@ -98,6 +100,8 @@ void GameObject::setRotation(float angle)
 
 void GameObject::setScale(float factorX, float factorY)
 {
+    scaleX = factorX;
+    scaleY = factorY;
     entity->setScale(factorX, factorY);
 }
 
@@ -205,7 +209,7 @@ void GameObject::to_bin()
     //BTMessage::to_bin();
 
     MESSAGE_SIZE = sizeof(uint8_t) + 20 * sizeof(char) + 
-    3 * sizeof(float) + 16 * sizeof(char) + sizeof(bool);
+    5 * sizeof(float) + 16 * sizeof(char) + sizeof(bool);
 
     alloc_data(MESSAGE_SIZE);
 
@@ -238,6 +242,15 @@ void GameObject::to_bin()
     // serializar active
     memcpy(_data, static_cast<void *>(&active), sizeof(bool));
     _data += sizeof(bool);
+
+    // serializar scaleX
+    memcpy(_data, static_cast<void *>(&scaleX), sizeof(float));
+    _data += sizeof(float);
+
+    // serializar scaleY
+    memcpy(_data, static_cast<void *>(&scaleY), sizeof(float));
+    _data += sizeof(float);
+
 
     // colocamos el puntero al inicio del fichero
     _data -= MESSAGE_SIZE;
@@ -296,6 +309,18 @@ int GameObject::from_bin(char *data)
         memcpy(static_cast<void *>(&active), data, sizeof(bool));
         data += sizeof(bool);
         _size += sizeof(bool);
+
+        // deserializamos scaleX
+        memcpy(static_cast<void *>(&scaleX), data, sizeof(float));
+        data += sizeof(float);
+        _size += sizeof(float);
+
+        // deserializamos scaleY
+        memcpy(static_cast<void *>(&scaleY), data, sizeof(float));
+        data += sizeof(float);
+        _size += sizeof(float);
+
+        setScale(scaleX, scaleY);
 
         //data -= MESSAGE_SIZE;
 

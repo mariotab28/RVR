@@ -25,7 +25,9 @@ private:
     float incSpeed = 80;
     float incAngleSpeed = 110;
     std::string nick;
-    bool reverse = false;
+    bool reverse = false;// TODO
+    float cooldown = 2;
+    float time = 0;
 
 public:
     Player(GameWorld *world);

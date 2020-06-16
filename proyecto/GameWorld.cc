@@ -32,6 +32,39 @@ GameWorld::~GameWorld()
 
 void GameWorld::createObjects()
 {
+    for (int i = 0; i < WALLS_SIZE; i++)
+    {
+        GameObject *wall = new GameObject(this, 1);
+        gameObjects.push_back(wall);
+        walls.push_back(wall);
+
+        wall->setTexture(*textures[4]);
+        wall->setOrigin(wall->getTexture()->getSize().x * 0.5,
+                        wall->getTexture()->getSize().y * 0.5);
+        wall->setId("Wall");
+    }
+    for (int i = 0; i < GEARS_SIZE; i++)
+    {
+        Gear *gear = new Gear(this);
+        gameObjects.push_back(gear);
+        gears.push_back(gear);
+
+        gear->setTexture(*textures[3]);
+        gear->setOrigin(gear->getTexture()->getSize().x * 0.5,
+                        gear->getTexture()->getSize().y * 0.5);
+        gear->setScale(0.4, 0.4);
+    }
+    for (int i = 0; i < BULLETS_SIZE; i++)
+    {
+        Bullet *bullet = new Bullet(this);
+        gameObjects.push_back(bullet);
+        bullets.push_back(bullet);
+
+        bullet->setTexture(*textures[2]);
+        bullet->setOrigin(bullet->getTexture()->getSize().x * 0.5,
+                          bullet->getTexture()->getSize().y * 0.5);
+        bullet->setScale(0.7, 0.5);
+    }
     for (int i = 0; i < PLAYERS_SIZE; i++)
     {
         // players
@@ -59,41 +92,6 @@ void GameWorld::createObjects()
 
         playerText->setFont(*fonts[0]);
     }
-    for (int i = 0; i < GEARS_SIZE; i++)
-    {
-        Gear *gear = new Gear(this);
-        gameObjects.push_back(gear);
-        gears.push_back(gear);
-
-        gear->setTexture(*textures[3]);
-        gear->setOrigin(gear->getTexture()->getSize().x * 0.5,
-                        gear->getTexture()->getSize().y * 0.5);
-        gear->setScale(0.4, 0.4);
-    }
-    for (int i = 0; i < BULLETS_SIZE; i++)
-    {
-        Bullet *bullet = new Bullet(this);
-        gameObjects.push_back(bullet);
-        bullets.push_back(bullet);
-
-        bullet->setTexture(*textures[2]);
-        bullet->setOrigin(bullet->getTexture()->getSize().x * 0.5,
-                          bullet->getTexture()->getSize().y * 0.5);
-        bullet->setScale(0.7, 0.5);
-    }
-
-    for (int i = 0; i < WALLS_SIZE; i++)
-    {
-        GameObject *w = new GameObject(this, 1);
-        gameObjects.push_back(w);
-        walls.push_back(w);
-
-        w->setTexture(*textures[4]);
-        w->setOrigin(w->getTexture()->getSize().x * 0.5,
-                     w->getTexture()->getSize().y * 0.5);
-        w->setScale(300, 200);
-        w->setId("Wall");
-    }
 
     GameObject *rankingText = new GameObject(this, 0);
     gameObjects.push_back(rankingText);
@@ -109,59 +107,14 @@ void GameWorld::createObjects()
     highscoreTitleText->setFont(*fonts[0]);
     highscoreTitleText->setActive(true);
     highscoreTitleText->setText("HIGHSCORE");
-    highscoreTitleText->setPosition(15, 5);
+    highscoreTitleText->setPosition(10, 5);
 
     highscoreText = new GameObject(this, 0);
     gameObjects.push_back(highscoreText);
 
     highscoreText->setFont(*fonts[0]);
     highscoreText->setActive(true);
-    highscoreText->setPosition(15, 30);
-
-    /*Gear *g = new Gear(this);
-    g->setTexture(*textures[3]);
-    g->setScale(0.8, 0.8);
-    g->setPosition(0, 0);
-    g->setOrigin(g->getTexture()->getSize().x * 0.5,
-                 g->getTexture()->getSize().y * 0.5);
-
-    gameObjects.push_back(g);
-
-    Gear *g2 = new Gear(this);
-    g2->setTexture(*textures[3]);
-    g2->setScale(0.8, 0.8);
-    g2->setPosition(0, 0);
-    g2->setOrigin(g2->getTexture()->getSize().x * 0.5,
-                  g2->getTexture()->getSize().y * 0.5);
-
-    gameObjects.push_back(g2);
-
-    // -----CREATE PLAYER------
-    Player *player = new Player(this);
-    player->setTexture(*textures[0]);
-    player->setOrigin(player->getTexture()->getSize().x * 0.5,
-                      player->getTexture()->getSize().y * 0.5);
-    player->setGunTexture(*textures[1]);
-    gameObjects.push_back(player);
-
-    player->setPosition(0, 0);
-    player->setScale(0.5f, 0.5f);
-    player->setId("Player1");
-
-    Player *player2 = new Player(this);
-    player2->setTexture(*textures[0]);
-    player2->setOrigin(player2->getTexture()->getSize().x * 0.5,
-                       player2->getTexture()->getSize().y * 0.5);
-    player2->setGunTexture(*textures[1]);
-    gameObjects.push_back(player2);
-
-    player2->setPosition(500, 200);
-    player2->setScale(0.5f, 0.5f);
-    player2->setId("Player2");
-
-    GameObject *text2 = createText(0, 20);
-    text2->setPosition(0, 0);
-    text2->setText("NULL");*/
+    highscoreText->setPosition(12, 30);
 }
 
 void GameWorld::init(sf::RenderWindow &window, int level)
@@ -179,83 +132,56 @@ void GameWorld::init(sf::RenderWindow &window, int level)
 
     highscoreText->setText(highScoreNick + ": " + std::to_string(highScore));
 
-    // TEST GEARS-------
+    // map bounds
+    std::vector<std::pair<float, float>> boundsWalls = {{100, window.getSize().y / 2},
+                                                        {window.getSize().x / 2, 0},
+                                                        {window.getSize().x, window.getSize().y / 2},
+                                                        {window.getSize().x / 2, window.getSize().y}};
 
-    for (int i = 0; i < initialGears; i++)
+    for (int i = 0; i < 4; i++)
     {
-        createGear(window);
+        GameObject *w = getObjectFromPool(walls);
+        w->setPosition(boundsWalls[i].first, boundsWalls[i].second);
+        if (i == 0)
+            w->setScale(leftX, window.getSize().y);
+        else if (i % 2 != 0)
+            w->setScale(window.getSize().x, 50);
+        else
+            w->setScale(50, window.getSize().y);
+        w->setActive(true);
     }
 
+    // create level
     switch (level)
     {
     case 0:
     {
-        GameObject *w = getObjectFromPool(walls);
-        w->setPosition(300, 300);
-        w->setActive(true);
-
+        createWall({400, 150}, {50, 300});
+        createWall({600, 450}, {50, 300});
         break;
     }
-
     case 1:
     {
+        createWall({320, 220}, {50, 200});
+        createWall({580, 420}, {200, 50});
+        createWall({580, 220}, {100, 100});
         break;
     }
-
+    case 2:
+    {
+        createWall({500, 300}, {300, 100});
+        createWall({500, 300}, {100, 300});
+        break;
+    }
     default:
         break;
     }
 
-    /*Gear *g2 = new Gear(this);
-    g2->setTexture(*textures[3]);
-    g2->setScale(0.8, 0.8);
-    g2->setPosition(200, 500);
-    g2->setOrigin(g2->getTexture()->getSize().x * 0.5,
-                  g2->getTexture()->getSize().y * 0.5);
-    g2->setId("Gear2");
-
-    gameObjects.push_back(g2);
-
-    // -----CREATE PLAYER------
-    Player *player = new Player(this);
-    player->setTexture(*textures[0]);
-    player->setOrigin(player->getTexture()->getSize().x * 0.5,
-                      player->getTexture()->getSize().y * 0.5);
-    player->setGunTexture(*textures[1]);
-    gameObjects.push_back(player);
-
-    player->setPosition(200, 200);
-    player->setScale(0.5f, 0.5f);
-    player->setId("Player1");
-
-    // PLAYER 2 TO TEST DEATH-----
-
-    Player *player2 = new Player(this);
-    player2->setTexture(*textures[0]);
-    player2->setOrigin(player2->getTexture()->getSize().x * 0.5,
-                       player2->getTexture()->getSize().y * 0.5);
-    player2->setGunTexture(*textures[1]);
-    gameObjects.push_back(player2);
-
-    player2->setPosition(500, 200);
-    player2->setScale(0.5f, 0.5f);
-    player2->setId("Player2");
-
-    // ------CREATE TEXTS------
-
-    text1 = createText(0, 20);
-    text1->setPosition(20, 60);
-    text1->setText("RANKING" + std::to_string(highScore));*/
-
-    /*GameObject *text2 = createText(0, 20);
-    text2->setPosition(20, 20);
-    text2->setText("HIGH SCORE: " + std::to_string(highScore));
-
-    text = "P1 POINTS: " + std::to_string(player->getPoints());
-
-    playerText = createText(0, 20);
-    playerText->setPosition(20, 80);
-    playerText->setText(text);*/
+    // create initial gears
+    for (int i = 0; i < initialGears; i++)
+    {
+        createGear(window);
+    }
 }
 
 int GameWorld::createPlayer(const std::string &nick, sf::RenderWindow &window)
@@ -274,7 +200,7 @@ int GameWorld::createPlayer(const std::string &nick, sf::RenderWindow &window)
             bool generate = false;
             do
             {
-                p->setPosition(rand() % window.getSize().x, rand() % window.getSize().y);
+                p->setPosition((rand() % (window.getSize().x - leftX + 1)) + leftX, rand() % window.getSize().y);
 
                 generate = false;
 
@@ -289,6 +215,38 @@ int GameWorld::createPlayer(const std::string &nick, sf::RenderWindow &window)
                         (*it)->isActive() &&
                         mySprite->getGlobalBounds().intersects(playerSprite->getGlobalBounds()) &&
                         (*it)->getId().compare(0, 6, "Player") == 0)
+                    {
+                        generate = true;
+                    }
+                }
+
+                // check collision with a wall--------------
+                std::vector<GameObject *> walls = getWalls();
+
+                for (auto it = walls.begin(); it != walls.end(); ++it)
+                {
+                    sf::Sprite *mySprite = p->getSprite();
+                    sf::Sprite *wallSprite = (*it)->getSprite();
+                    if (mySprite != nullptr && wallSprite != nullptr &&
+                        (*it)->isActive() &&
+                        mySprite->getGlobalBounds().intersects(wallSprite->getGlobalBounds()) &&
+                        (*it)->getId().compare(0, 4, "Wall") == 0)
+                    {
+                        generate = true;
+                    }
+                }
+
+                // check collision with a gear--------------
+                std::vector<GameObject *> gears = getGears();
+
+                for (auto it = gears.begin(); it != gears.end(); ++it)
+                {
+                    sf::Sprite *mySprite = p->getSprite();
+                    sf::Sprite *gearSprite = (*it)->getSprite();
+                    if (mySprite != nullptr && gearSprite != nullptr &&
+                        (*it)->isActive() &&
+                        mySprite->getGlobalBounds().intersects(gearSprite->getGlobalBounds()) &&
+                        (*it)->getId().compare(0, 4, "Gear") == 0)
                     {
                         generate = true;
                     }
@@ -334,6 +292,14 @@ void GameWorld::removePlayer(int i)
     }
     else
         printf("ERROR: trying to remove a invalid player\n");
+}
+
+void GameWorld::createWall(const std::pair<float, float> &pos, const std::pair<float, float> &scale)
+{
+    GameObject *w = getObjectFromPool(walls);
+    w->setScale(scale.first, scale.second);
+    w->setPosition(pos.first, pos.second);
+    w->setActive(true);
 }
 
 GameObject *GameWorld::getObjectFromPool(const std::vector<GameObject *> &pool)
@@ -408,6 +374,7 @@ void GameWorld::createBullet(float posX, float posY, float angle, std::string ow
         b->setRotation(angle);
         b->setId("Bullet" + ownerId);
         b->setActive(true);
+        b->resetBounces();
     }
 }
 
@@ -463,7 +430,7 @@ void GameWorld::updatePlayerTexts()
     {
         if (players[i]->isActive())
         {
-            playerTexts[i]->setPosition(players[i]->getX() - 20, players[i]->getY() - 100);
+            playerTexts[i]->setPosition(players[i]->getX() - 20, players[i]->getY() - 70);
         }
     }
 }
@@ -480,7 +447,7 @@ void GameWorld::createGear(const sf::RenderWindow &window)
 
         do
         {
-            g->setPosition(rand() % window.getSize().x, rand() % window.getSize().y);
+            g->setPosition((rand() % (window.getSize().x - leftX + 1)) + leftX, rand() % window.getSize().y);
 
             generate = false;
 
@@ -494,6 +461,22 @@ void GameWorld::createGear(const sf::RenderWindow &window)
                 if (mySprite != nullptr && playerSprite != nullptr &&
                     (*it)->isActive() &&
                     mySprite->getGlobalBounds().intersects(playerSprite->getGlobalBounds()) && (*it)->getId().compare(0, 6, "Player") == 0)
+                {
+                    generate = true;
+                }
+            }
+
+            // check collision with a wall--------------
+            std::vector<GameObject *> walls = getWalls();
+
+            for (auto it = walls.begin(); it != walls.end(); ++it)
+            {
+                sf::Sprite *mySprite = g->getSprite();
+                sf::Sprite *wallSprite = (*it)->getSprite();
+                if (mySprite != nullptr && wallSprite != nullptr &&
+                    (*it)->isActive() &&
+                    mySprite->getGlobalBounds().intersects(wallSprite->getGlobalBounds()) &&
+                    (*it)->getId().compare(0, 4, "Wall") == 0)
                 {
                     generate = true;
                 }
