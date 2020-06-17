@@ -10,10 +10,6 @@ Bullet::Bullet(GameWorld *world) : GameObject(world, 1)
     resetBounces();
 }
 
-Bullet::~Bullet()
-{
-}
-
 void Bullet::update(sf::RenderWindow &window, sf::Time &elapsedTime)
 {
     GameObject::update(window, elapsedTime);

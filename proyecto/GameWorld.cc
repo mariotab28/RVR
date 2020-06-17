@@ -10,14 +10,24 @@
 #include "Bullet.h"
 #include "Gear.h"
 
+// sort function
 static bool sortInv(const std::pair<int, int> &a,
                     const std::pair<int, int> &b)
 {
     return (a.first > b.first);
 }
 
+//---------------------------------------------------
+
 GameWorld::GameWorld() : BTMessage("")
 {
+    PLAYERS_SIZE = 8;
+    GEARS_SIZE = 2;
+    BULLETS_SIZE = 50;
+    WALLS_SIZE = 10;
+
+    initialGears = 2;
+    leftX = 200;
 }
 
 GameWorld::~GameWorld()
@@ -93,14 +103,16 @@ void GameWorld::createObjects()
         playerText->setFont(*fonts[0]);
     }
 
+    // ranking text
     GameObject *rankingText = new GameObject(this, 0);
     gameObjects.push_back(rankingText);
 
     rankingText->setFont(*fonts[0]);
     rankingText->setActive(true);
     rankingText->setText("RANKING");
-    rankingText->setPosition(15, 70);
+    rankingText->setPosition(15, 90);
 
+    // highscore texts
     GameObject *highscoreTitleText = new GameObject(this, 0);
     gameObjects.push_back(highscoreTitleText);
 
@@ -114,7 +126,7 @@ void GameWorld::createObjects()
 
     highscoreText->setFont(*fonts[0]);
     highscoreText->setActive(true);
-    highscoreText->setPosition(12, 30);
+    highscoreText->setPosition(12, 32);
 }
 
 void GameWorld::init(sf::RenderWindow &window, int level)
@@ -128,11 +140,10 @@ void GameWorld::init(sf::RenderWindow &window, int level)
         file >> highScoreNick >> highScore;
         file.close();
     }
-    printf("%s: %d\n", highScoreNick.c_str(), highScore);
 
     highscoreText->setText(highScoreNick + ": " + std::to_string(highScore));
 
-    // map bounds
+    // create map bounds with 4 walls
     std::vector<std::pair<float, float>> boundsWalls = {{100, window.getSize().y / 2},
                                                         {window.getSize().x / 2, 0},
                                                         {window.getSize().x, window.getSize().y / 2},
@@ -151,7 +162,7 @@ void GameWorld::init(sf::RenderWindow &window, int level)
         w->setActive(true);
     }
 
-    // create level
+    // create the level chosen
     switch (level)
     {
     case 0:
@@ -179,9 +190,7 @@ void GameWorld::init(sf::RenderWindow &window, int level)
 
     // create initial gears
     for (int i = 0; i < initialGears; i++)
-    {
         createGear(window);
-    }
 }
 
 int GameWorld::createPlayer(const std::string &nick, sf::RenderWindow &window)
@@ -201,7 +210,6 @@ int GameWorld::createPlayer(const std::string &nick, sf::RenderWindow &window)
             do
             {
                 p->setPosition((rand() % (window.getSize().x - leftX + 1)) + leftX, rand() % window.getSize().y);
-
                 generate = false;
 
                 // check collision with a player--------------
@@ -261,11 +269,8 @@ int GameWorld::createPlayer(const std::string &nick, sf::RenderWindow &window)
             playerTexts[i]->setActive(true);
             playerTexts[i]->setText("P" + std::to_string(i + 1));
 
-            // score
+            // score text
             scoreTexts[i]->setActive(true);
-            //scoreTexts[i]->setText("P" + std::to_string(i) + " " + nick + " 0");
-            // pos Y
-
             updateScoreTexts();
         }
     }
@@ -285,7 +290,6 @@ void GameWorld::removePlayer(int i)
         players[i]->setActive(false);
         static_cast<Player *>(players[i])->setPoints(0);
         playerTexts[i]->setActive(false);
-
         scoreTexts[i]->setActive(false);
 
         updateScoreTexts();
@@ -308,8 +312,6 @@ GameObject *GameWorld::getObjectFromPool(const std::vector<GameObject *> &pool)
     int i = 0;
     while (i < pool.size() && pool[i]->isActive())
         i++;
-
-    //printf("pool size: %d i: %d\n", pool.size(), i);
 
     if (i < pool.size())
         go = pool[i];
@@ -359,7 +361,6 @@ bool GameWorld::loadFont(const std::string &fontFilename)
         return false;
 
     fonts.push_back(font);
-    printf("font loaded\n");
     return true;
 }
 
@@ -380,31 +381,26 @@ void GameWorld::createBullet(float posX, float posY, float angle, std::string ow
 
 void GameWorld::updateScoreTexts()
 {
-    // crear aux <points, index>
     std::vector<std::pair<int, int>> aux;
 
-    // inicializo aux
     for (int i = 0; i < players.size(); i++)
     {
         if (players[i]->isActive())
         {
-            aux.push_back({static_cast<Player *>(players[i])->getPoints(),
-                           i});
+            aux.push_back({static_cast<Player *>(players[i])->getPoints(), i});
             scoreTexts[i]->setText("P" + std::to_string(i + 1) + " " + static_cast<Player *>(players[i])->getNick() +
                                    " " + std::to_string(static_cast<Player *>(players[i])->getPoints()));
         }
     }
 
-    // ordeno aux
+    // sort from major to minor score
     std::sort(aux.begin(), aux.end(), sortInv);
 
-    // recorro aux
     for (int j = 0; j < aux.size(); j++)
-    {
-        scoreTexts[aux[j].second]->setPosition(14, 100 + j * 30);
-    }
+        scoreTexts[aux[j].second]->setPosition(14, 120 + j * 30);
 
-    // update highscore
+    // update and write highscore in file "data.txt"
+    // if best score is greater
     if (aux.size() > 0 && highScore < aux[0].first)
     {
         highScore = aux[0].first;
@@ -418,7 +414,6 @@ void GameWorld::updateScoreTexts()
             file << highScoreNick << " " << highScore;
             file.close();
         }
-        //printf("%s: %d\n", highScoreNick.c_str(), highScore);
 
         highscoreText->setText(highScoreNick + ": " + std::to_string(highScore));
     }
@@ -429,9 +424,7 @@ void GameWorld::updatePlayerTexts()
     for (int i = 0; i < playerTexts.size(); i++)
     {
         if (players[i]->isActive())
-        {
             playerTexts[i]->setPosition(players[i]->getX() - 20, players[i]->getY() - 70);
-        }
     }
 }
 
@@ -444,7 +437,6 @@ void GameWorld::createGear(const sf::RenderWindow &window)
         g->setActive(true);
 
         bool generate = false;
-
         do
         {
             g->setPosition((rand() % (window.getSize().x - leftX + 1)) + leftX, rand() % window.getSize().y);
@@ -503,15 +495,11 @@ void GameWorld::update(sf::RenderWindow &window, sf::Time &elapsedTime)
     }
 
     updatePlayerTexts();
-    //updateScoreTexts();
-
-    /*highScore++;
-    text1->setText("RANKING" + std::to_string(highScore));*/
 }
 
 bool GameWorld::handleInput(sf::RenderWindow &window, BTMessage &message)
 {
-    bool result = false;
+    result = false;
     while (window.pollEvent(event))
     {
         if (event.type == sf::Event::Closed)
@@ -520,82 +508,41 @@ bool GameWorld::handleInput(sf::RenderWindow &window, BTMessage &message)
             result = true;
         }
         else
-        { // LLAMAR AL HANDLEINPUT DE 1 PLAYER SOLO
-            /*for (auto go : gameObjects)
-            {
-                if (go->isActive())
-                    go->handleInput(event, window);
-            }*/
-
+        {
             if (event.type == sf::Event::KeyPressed)
             {
                 message.message = "Press";
                 // MOVEMENT INPUT
                 if (event.key.code == sf::Keyboard::D)
-                {
-                    message.message.append("D");
-                    result = true;
-                }
+                    appendMessage(message, "D");
                 if (event.key.code == sf::Keyboard::A)
-                {
-                    message.message.append("A");
-                    result = true;
-                }
+                    appendMessage(message, "A");
                 if (event.key.code == sf::Keyboard::W)
-                {
-                    message.message.append("W");
-                    result = true;
-                }
+                    appendMessage(message, "W");
                 if (event.key.code == sf::Keyboard::S)
-                {
-                    message.message.append("S");
-                    result = true;
-                }
+                    appendMessage(message, "S");
+                // GUN ROTATION INPUT
                 if (event.key.code == sf::Keyboard::Q)
-                {
-                    message.message.append("Q");
-                    result = true;
-                }
+                    appendMessage(message, "Q");
                 if (event.key.code == sf::Keyboard::E)
-                {
-                    message.message.append("E");
-                    result = true;
-                }
+                    appendMessage(message, "E");
             }
 
             if (event.type == sf::Event::KeyReleased)
             {
                 message.message = "Relea";
                 if (event.key.code == sf::Keyboard::D)
-                {
-                    message.message.append("D");
-                    result = true;
-                }
+                    appendMessage(message, "D");
                 if (event.key.code == sf::Keyboard::A)
-                {
-                    message.message.append("A");
-                    result = true;
-                }
+                    appendMessage(message, "A");
                 if (event.key.code == sf::Keyboard::W)
-                {
-                    message.message.append("W");
-                    result = true;
-                }
+                    appendMessage(message, "W");
                 if (event.key.code == sf::Keyboard::S)
-                {
-                    message.message.append("S");
-                    result = true;
-                }
+                    appendMessage(message, "S");
                 if (event.key.code == sf::Keyboard::Q)
-                {
-                    message.message.append("Q");
-                    result = true;
-                }
+                    appendMessage(message, "Q");
                 if (event.key.code == sf::Keyboard::E)
-                {
-                    message.message.append("E");
-                    result = true;
-                }
+                    appendMessage(message, "E");
             }
 
             if (event.type == sf::Event::MouseButtonPressed)
@@ -603,106 +550,62 @@ bool GameWorld::handleInput(sf::RenderWindow &window, BTMessage &message)
                 message.message = "Mouse";
                 result = true;
             }
-
-            // TODO: ESTO DA ERROR CUANDO SE CIERRA LA VENTANA!!
-            /*if(mouseX != sf::Mouse::getPosition(window).x)
-            {
-                mouseX = sf::Mouse::getPosition(window).x;
-                message.mouseX = sf::Mouse::getPosition(window).x;
-                result = true;
-            }
-
-            if(mouseY != sf::Mouse::getPosition(window).y)
-            {
-                mouseY = sf::Mouse::getPosition(window).y;
-                message.mouseY = sf::Mouse::getPosition(window).y;
-                result = true;
-            }*/
-
-            //message.mouseY = sf::Mouse::getPosition(window).y;
         }
     }
 
     return result;
 }
 
+void GameWorld::appendMessage(BTMessage &message, const char *c)
+{
+    message.message.append(c);
+    result = true;
+}
+
 void GameWorld::processInput(BTMessage message)
 {
-    //printf("process input index: %d\n", message.index);
     if (players[message.index]->isActive())
         static_cast<Player *>(players[message.index])->processInput(message);
 }
 
 void GameWorld::to_bin()
 {
-    //BTMessage::to_bin();
-
     MESSAGE_SIZE = 0;
 
-    //printf("gameobjects size: %d\n", gameObjects.size());
-
-    // Calculate GameWorld message_size
+    // calculate GameWorld message_size
     for (auto go : gameObjects)
-    //for (size_t i = 0; i < gameObjects.size(); i++)
     {
         go->to_bin();
         MESSAGE_SIZE += go->MESSAGE_SIZE;
-        //printf("go size: %d\n", go->MESSAGE_SIZE);
-        //printf("%d\n", gameObjects.size());
     }
-    //printf("eeeee\n");
-    //printf("%s\n",gameObjects[0]->getId().c_str());
-    //std::cout << MESSAGE_SIZE << "\n";
 
     alloc_data(MESSAGE_SIZE);
-    //printf("ooooo\n");
     memset(_data, 0, MESSAGE_SIZE);
 
-    // Serialize each gameObject
+    // serialize each gameObject
     for (auto go : gameObjects)
     {
-        // serializar goType
         memcpy(_data, static_cast<void *>(go->data()), go->size());
-
-        //printf("go data: %c\n", _data);
         _data += go->size();
-
-        //printf("copied go size: %d\n", go->size());
     }
 
-    //printf("finished: %d\n", MESSAGE_SIZE);
-
     _data -= MESSAGE_SIZE;
-
-    //printf("gameobjects size: %d\n", gameObjects.size());
-
-    //printf("data size: %d\n", strlen(_data));
-    //printf("tobin done\n");
-    //std::cout << gameObjects[0]->data() << "\n";
 }
 
 int GameWorld::from_bin(char *data)
 {
-    //std::cout << "gameWorld from_bin" << "\n";
-    for (auto go : gameObjects)
+    try
     {
-        if (go == nullptr)
-            printf("null\n");
-        else
+        // deserialize each gameObject
+        for (auto go : gameObjects)
+        {
             go->from_bin(data);
-
-        data += go->size();
-
-        //printf("size: %d\n", go->size());
-        //printf("a\n");
+            data += go->size();
+        }
+        return 0;
     }
-
-    //printf("gear active: %d posX: %f\n", gameObjects[8]->isActive(), gameObjects[8]->getX());
-
-    //printf("frombin finished\n");
-    //printf("1x: %f 1y: %f\n", gameObjects[0]->getX(), gameObjects[0]->getY());
-    //printf("2x: %f 2y: %f\n", gameObjects[1]->getX(), gameObjects[1]->getY());
-    //std::cout << "angle: " << gameObjects[0]->getRotation() << "\n";
-
-    return 0;
+    catch (const std::exception &e)
+    {
+        return -1;
+    }
 }

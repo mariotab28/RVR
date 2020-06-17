@@ -21,12 +21,6 @@ class GameObject : public BTMessage
 private:
     sf::Transformable *entity;
 
-    /*enum TYPE
-    {
-        TEXT,
-        SPRITE
-    };*/
-
 protected:
     const float PI = 3.14159265359;
 
@@ -43,11 +37,9 @@ protected:
     float scaleX;
     float scaleY;
 
-    // serializar?
+    // NO serializar
     float speed;
     float dirX, dirY;
-
-    // NO serializar
     GameWorld *world;
 
 public:
@@ -71,7 +63,6 @@ public:
     void setSpeed(float speed);
     void setActive(bool active);
 
-    //const std::pair<float, float> getDir();
     float getX();
     float getY();
     std::string getId();

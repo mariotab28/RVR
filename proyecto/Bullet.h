@@ -18,13 +18,8 @@ private:
 
 public:
     Bullet(GameWorld *world);
-    virtual ~Bullet();
 
     virtual void update(sf::RenderWindow &window, sf::Time &elapsedTime);
-
-    /*virtual void render(sf::RenderWindow &window);
-    virtual void update();
-    virtual void handleInput(sf::Event &event);*/
 
     bool checkBounces();
     void resetBounces();

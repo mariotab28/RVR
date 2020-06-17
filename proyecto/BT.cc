@@ -10,17 +10,12 @@ void BTServer::start()
     // ----WINDOW CREATION-----
     window = new sf::RenderWindow(sf::VideoMode(800, 600), "Window title");
     window->setTitle("Bouncy Tanks - SERVER");
-    // background color
     bg = new sf::Color(180, 180, 180); //grey
 
     window->setVisible(false);
 
     // ----LOAD RESOURCES-----
-
     world = new GameWorld();
-
-    printf("world created\n");
-
     world->loadTexture("assets/tankBase.png");
     world->loadTexture("assets/tankGun.png");
     world->loadTexture("assets/bullet.png");
@@ -29,52 +24,30 @@ void BTServer::start()
 
     world->loadFont("assets/arial.ttf");
 
-    // ----INIT WORLD (READ MAP)---
-
+    // ----INIT WORLD---
     clock = new sf::Clock();
-
-    printf("%d\n",level);
-
     world->createObjects();
     world->init(*window, level);
-
-    printf("world initialized\n");
 }
 
 void BTServer::do_messages()
 {
     while (true)
     {
-        //Recibir Mensajes en y en función del tipo de mensaje
-        // - LOGIN: Añadir al vector clients
-        // - LOGOUT: Eliminar del vector clients
-        // - MESSAGE: Reenviar el mensaje a todos los clientes (menos el emisor)
-
-        //std::cout << "domessages\n";
-
         Socket *client = &socket;
         BTMessage message;
 
         if (socket.recv(message, client) == -1)
-        {
             std::cout << "ERROR recv -1\n";
-        }
 
-        //printf("recv\n");
-
-        //std::to_string(message.type);
-        //std::cout << "type: " << std::to_string(message.type) << "\n";
-        //std::cout << *client << "\n";
         switch (message.type)
         {
         case BTMessage::LOGIN:
         {
             std::cout << "LOGIN " << *client << "\n";
-            //std::cout << "LOGIN\n";
+
             if (client == nullptr)
-            {
                 printf("ERROR: Trying to login a nullptr client\n");
-            }
             else
             {
                 // añadir el client al vector clients
@@ -83,6 +56,7 @@ void BTServer::do_messages()
                 // enviar mensaje de accept con index
                 BTMessage acceptMessage;
                 acceptMessage.type = BTMessage::ACCEPT;
+
                 // crear tanque del jugador y asignar index
                 acceptMessage.index = world->createPlayer(message.nick, *window);
                 if (acceptMessage.index != -1)
@@ -90,7 +64,6 @@ void BTServer::do_messages()
             }
 
             std::cout << "CLIENTS CONNECTED: " << clients.size() << "\n";
-
             break;
         }
         case BTMessage::LOGOUT:
@@ -106,27 +79,13 @@ void BTServer::do_messages()
                     delete *it;
                     clients.erase(it);
 
-                    // destruir tanque del jugador
                     world->removePlayer(pos);
-
                     break;
                 }
-
                 pos++;
             }
 
-            /*for (int i = 0; i < ; i++)
-            {
-                /* code */
-
-            /*if(pos < clients.size())
-            {
-                ;
-            }*/
-
-            std::cout
-                << "CLIENTS CONNECTED: " << clients.size() << "\n";
-
+            std::cout << "CLIENTS CONNECTED: " << clients.size() << "\n";
             break;
         }
         case BTMessage::INPUT:
@@ -135,25 +94,7 @@ void BTServer::do_messages()
 
             // transcribir el texto del mensaje a input
             if (message.message.size() > 0)
-            {
-                //printf("message: %s\n", message.message.c_str());
-                // hacer handleInput para el jugador indicado en el msg
-                //printf("index: %d\n", message.index);
-
                 world->processInput(message);
-            }
-
-            // comprobar que el client este logeado (i.e. este en el vector
-            // clients)
-            //std::cout << "MESSAGE " << *client << "\n";
-            /*for (auto it = clients.begin(); it != clients.end(); ++it)
-            {
-                if (!(*(*it) == *client))
-                {
-                    std::cout << "ENVIANDO A " << *(*it) << "\n";
-                    socket.send(message, *(*it));
-                }
-            }*/
 
             break;
         }
@@ -177,59 +118,21 @@ void BTServer::simulate()
         //time = 0;
 
         // UPDATE WORLD
-
-        // ver si hay algun input en la cola
-        // sacar el input de la cola
-        // y evaluar
-
+        // update
         world->update(*window, elapsedTime);
 
-        /*world->getGameObjects()[0]->setRotation(
-            world->getGameObjects()[0]->getRotation() + 0.1f);
-
-        world->getGameObjects()[0]->setPosition(
-            world->getGameObjects()[0]->getX()+0.1f,
-            world->getGameObjects()[0]->getY()
-        );*/
-
-        // Clear screen
+        // render
         window->clear(*bg);
-
-        // Render
-        //world->update(*window);
         world->render(*window);
-
-        // Update the window
         window->display();
 
-        //printf("%d\n")
-
-        // SEND ALL WORLD
-        //BTMessage msg;
-        //msg.type = BTMessage::OBJECT;
-        //std::cout << "serializate" << "\n";
-
-        //msg.setData(world->serializate());
-
-        //std::cout << "size: " << msg.size() << "\n";
-
-        //std::cout << "serializate finished" << "\n";
-
-        //std::cout << "MESSAGE \n";
+        // SEND WORLD TO ALL THE CLIENTS
         for (auto it = clients.begin(); it != clients.end(); ++it)
-        {
-            //std::cout << "ENVIANDO A " << *(*it) << "\n";
             socket.send(*world, *(*it));
-        }
-
-        /*}
-        else
-        {
-            time += deltaTime;
-        }*/
     }
 }
 
+// --------------------------------------------------------------------
 // --------------------------------------------------------------------
 
 void BTClient::start()
@@ -237,17 +140,12 @@ void BTClient::start()
     // ----WINDOW CREATION-----
     window = new sf::RenderWindow(sf::VideoMode(800, 600, 16), "Window title");
     window->setTitle("Bouncy Tanks - CLIENT");
-    // background color
     bg = new sf::Color(180, 180, 180); //grey
 
     window->setActive(false);
 
     // ----LOAD RESOURCES-----
-
     world = new GameWorld();
-
-    printf("world created\n");
-
     world->loadTexture("assets/tankBase.png");
     world->loadTexture("assets/tankGun.png");
     world->loadTexture("assets/bullet.png");
@@ -257,14 +155,11 @@ void BTClient::start()
     world->loadFont("assets/arial.ttf");
 
     // ----INIT WORLD (READ MAP)---
-
     world->createObjects();
 
     clock = new sf::Clock();
     time = 0;
     deltaTime = 0;
-
-    printf("clientInit\n");
 }
 
 void BTClient::login()
@@ -289,29 +184,12 @@ void BTClient::logout()
 
 void BTClient::input_thread()
 {
-    printf("main_thread\n");
-
     while (window->isOpen())
     {
         // HANDLE INPUT
-        //printf("a\n");
-
-        //elapsedTime = clock->restart();
-        //deltaTime = elapsedTime.asMilliseconds();
-
-        //printf("time: %f deltaTime: %f\n", time, deltaTime);
-
-        //if (time > 33.33f)
-        //{
-        //time = 0;
-
-        //printf("tick\n");
-
         BTMessage inputMessage(nick);
         inputMessage.type = BTMessage::INPUT;
         inputMessage.index = index;
-
-        //printf("index: %d\n", index);
 
         if (world->handleInput(*window, inputMessage))
         {
@@ -319,26 +197,6 @@ void BTClient::input_thread()
             if (socket.send(inputMessage, socket) < 0)
                 printf("send error!\n");
         }
-        /*}
-        else
-        {
-            time += deltaTime;
-        }*/
-        //printf("a\n");
-
-        // Leer stdin con std::getline
-        // Enviar al servidor usando socket
-        /*std::string msg;
-        std::getline(std::cin, msg);
-
-        // Si el cliente pulsa 'q' cierra su conexión
-        if (msg == "q")
-            break;*/
-
-        /*BTMessage em(nick);
-        em.type = BTMessage::OBJECT;
-
-        socket.send(em, socket);*/
     }
 
     logout();
@@ -346,34 +204,14 @@ void BTClient::input_thread()
 
 void BTClient::net_thread()
 {
-    printf("net_thread\n");
-
     while (window->isOpen())
     {
         // RECEIVE WORLD
-
-        //printf("aaaaaa\n");
-
-        //Recibir Mensajes de red
-        //Mostrar en pantalla el mensaje de la forma "nick: mensaje"
-        //BTMessage msg;
         socket.recv(*world);
 
-        //printf("deserializate\n");
-
-        //world->from_bin(msg.data());
-
-        //printf("a\n");
         // RENDER WORLD
-
-        // Clear screen
         window->clear(*bg);
-
-        // Render
-        //world->update(*window);
         world->render(*window);
-
-        // Update the window
         window->display();
     }
 
@@ -390,11 +228,7 @@ void BTClient::wait()
     socket.recv(msg);
 
     if (msg.type == BTMessage::ACCEPT)
-    {
         index = msg.index;
-    }
     else
-    {
         wait();
-    }
 }

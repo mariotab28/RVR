@@ -20,20 +20,24 @@ namespace sf
 class GameWorld : public BTMessage
 {
 private:
-    // 8 players, 1 gear, 50 bullets, 10 walls, 8 playertexts, 8 scoretexts
-    int PLAYERS_SIZE = 8;
-    int GEARS_SIZE = 2;
-    int BULLETS_SIZE = 50;
-    int WALLS_SIZE = 10;
+    int PLAYERS_SIZE;
+    int GEARS_SIZE;
+    int BULLETS_SIZE;
+    int WALLS_SIZE;
 
-    int initialGears = 2;
-
-    int leftX = 200;
+    int initialGears;
+    int leftX;
 
     sf::Event event;
+    bool result;
+
+    // resources
+    std::vector<sf::Texture *> textures;
+    std::vector<sf::Font *> fonts;
 
     std::vector<GameObject *> gameObjects;
 
+    // pools
     std::vector<GameObject *> players;
     std::vector<GameObject *> gears;
     std::vector<GameObject *> bullets;
@@ -43,13 +47,6 @@ private:
 
     GameObject *highscoreText;
 
-    std::vector<sf::Texture *> textures;
-    std::vector<sf::Font *> fonts;
-
-    // test
-    //Player *player2;
-    //std::string text;
-
     int highScore;
     std::string highScoreNick;
 
@@ -57,15 +54,17 @@ public:
     GameWorld();
     ~GameWorld();
 
-    void init(sf::RenderWindow& window, int level);
+    void init(sf::RenderWindow &window, int level);
     void createObjects();
 
-    int createPlayer(const std::string& nick, sf::RenderWindow& window);
+    int createPlayer(const std::string &nick, sf::RenderWindow &window);
+    void createBullet(float posX, float posY, float angle, std::string ownerId);
+    void createWall(const std::pair<float, float> &pos, const std::pair<float, float> &scale);
+    void createGear(const sf::RenderWindow &window);
+
     void removePlayer(int i);
 
-    void createWall(const std::pair<float, float>& pos, const std::pair<float, float>& scale);
-
-    GameObject* getObjectFromPool(const std::vector<GameObject*>& pool);
+    GameObject *getObjectFromPool(const std::vector<GameObject *> &pool);
 
     std::vector<GameObject *> getGameObjects();
     std::vector<GameObject *> getPlayers();
@@ -76,21 +75,18 @@ public:
     bool loadTexture(const std::string &textureFilename);
     bool loadFont(const std::string &fontFilename);
 
-    void createBullet(float posX, float posY, float angle, std::string ownerId);
-
     void updateScoreTexts();
     void updatePlayerTexts();
 
-    void createGear(const sf::RenderWindow& window);
-
     void render(sf::RenderWindow &window);
-    void update(sf::RenderWindow &window, sf::Time& elapsedTime);
-    bool handleInput(sf::RenderWindow &window, BTMessage& message);
+    void update(sf::RenderWindow &window, sf::Time &elapsedTime);
+    bool handleInput(sf::RenderWindow &window, BTMessage &message);
 
     void processInput(BTMessage message);
+    void appendMessage(BTMessage &message, const char *c);
 
     virtual void to_bin();
-    virtual int from_bin(char * data);
+    virtual int from_bin(char *data);
 };
 
 #endif /* GAMEWORLD_H_ */

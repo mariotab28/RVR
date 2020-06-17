@@ -33,7 +33,6 @@ int main(int argc, char **argv)
     thread.launch();
 
     es.simulate();
-    //es.do_messages();
 
     sigemptyset(&waitset);
     sigaddset(&waitset, SIGQUIT);

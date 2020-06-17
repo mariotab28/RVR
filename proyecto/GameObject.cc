@@ -8,9 +8,6 @@
 GameObject::GameObject(GameWorld *world, int goType)
     : BTMessage(""), world(world), goType(goType)
 {
-    /*MESSAGE_SIZE += sizeof(uint8_t) + sizeof(char) * 20 + sizeof(float) * 3
-     + sizeof(char) * 12;*/
-
     id = "";
     text = "";
     x = 0;
@@ -128,11 +125,6 @@ void GameObject::setActive(bool active)
 
 //-----------------------------------
 
-/*const std::pair<float, float> GameObject::getDir()
-{
-    return std::pair<float, float>(dirX, dirY);
-}*/
-
 float GameObject::getX()
 {
     return x;
@@ -161,7 +153,6 @@ sf::Sprite *GameObject::getSprite()
 {
     if (goType == 0)
     {
-        //printf("ERROR: trying to getSprite from a non-sprite GO\n");
         return nullptr;
     }
 
@@ -177,24 +168,20 @@ bool GameObject::isActive()
 
 void GameObject::render(sf::RenderWindow &window)
 {
-    //std::cout << "goType: " << std::to_string(goType) << "\n";
     if (goType == 0)
         window.draw(*static_cast<sf::Text *>(entity));
     else
-    {
         window.draw(*static_cast<sf::Sprite *>(entity));
-        //window.draw(*static_cast<sf::Sprite *>(entity)->getGlobalBounds());
-    }
 }
 
 void GameObject::update(sf::RenderWindow &window, sf::Time& elapsedTime)
 {
-    //printf("elapsedTime: %f\n", elapsedTime.asSeconds());
-    // pos + velocity
+    // update pos
     x += dirX * speed * elapsedTime.asSeconds();
     y += dirY * speed * elapsedTime.asSeconds();
     setPosition(x, y);
 
+    // update dir
     dirX = cosf(angle * PI / 180);
     dirY = sinf(angle * PI / 180);
     setRotation(angle);
@@ -206,8 +193,6 @@ void GameObject::handleInput(sf::Event &event, sf::RenderWindow &window)
 
 void GameObject::to_bin()
 {
-    //BTMessage::to_bin();
-
     MESSAGE_SIZE = sizeof(uint8_t) + 20 * sizeof(char) + 
     5 * sizeof(float) + 16 * sizeof(char) + sizeof(bool);
 
@@ -250,7 +235,6 @@ void GameObject::to_bin()
     // serializar scaleY
     memcpy(_data, static_cast<void *>(&scaleY), sizeof(float));
     _data += sizeof(float);
-
 
     // colocamos el puntero al inicio del fichero
     _data -= MESSAGE_SIZE;
@@ -321,8 +305,6 @@ int GameObject::from_bin(char *data)
         _size += sizeof(float);
 
         setScale(scaleX, scaleY);
-
-        //data -= MESSAGE_SIZE;
 
         return 0;
     }

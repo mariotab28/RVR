@@ -12,8 +12,8 @@
 class BTMessage : public Serializable
 {
 public:
-    size_t MESSAGE_SIZE = 8*sizeof(char)  + 2*sizeof(uint8_t) + 2*sizeof(float)
-    + 12*sizeof(char);
+    size_t MESSAGE_SIZE = 8 * sizeof(char) + 2 * sizeof(uint8_t) +
+     12 * sizeof(char);
 
     enum MessageType
     {
@@ -24,7 +24,6 @@ public:
     };
 
     BTMessage(){};
-
     BTMessage(const std::string &n) : nick(n){};
 
     virtual void to_bin();
@@ -37,8 +36,6 @@ public:
     // QUITAR MOUSEX Y MOUSEY DE FROMBIN Y TOBIN
     uint8_t index;
     std::string message; // max. 12
-    float mouseX;
-    float mouseY;
 };
 
 #endif /* BTMESSAGE_H_ */

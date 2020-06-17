@@ -15,10 +15,6 @@ namespace sf
     class Clock;
     class Time;
 }; // namespace sf
-
-// TODO: SI SE CIERRA EL SERVER, SE TIENE QUE ENVIAR UN MENSAJE A TODOS LOS
-// CLIENTES PARA QUE SE CIERREN ANTES
-
 class GameWorld;
 
 class BTServer
@@ -37,7 +33,6 @@ public:
     };
 
     void start();
-
     void do_messages();
     void simulate();
 

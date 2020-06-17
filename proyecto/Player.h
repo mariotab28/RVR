@@ -16,18 +16,17 @@ private:
 
     float incAngle;
     float gunIncAngle;
-    //float mouseX, mouseY;
 
     // info a serializar
     uint8_t points;
 
     // NO serializar
-    float incSpeed = 80;
-    float incAngleSpeed = 110;
+    float incSpeed;
+    float incAngleSpeed;
     std::string nick;
-    bool reverse = false;// TODO
-    float cooldown = 2;
-    float time = 0;
+    bool reverse;
+    float cooldown;
+    float time;
 
 public:
     Player(GameWorld *world);
@@ -35,9 +34,11 @@ public:
 
     virtual void render(sf::RenderWindow &window);
     virtual void update(sf::RenderWindow &window, sf::Time& elapsedTime);
-    //virtual void handleInput(sf::Event &event, sf::RenderWindow &window);
 
     void processInput(BTMessage message);
+
+    void checkBulletCollision(sf::RenderWindow& window);
+    void checkWallCollision();
 
     void setGunTexture(sf::Texture &texture);
     void shoot();
