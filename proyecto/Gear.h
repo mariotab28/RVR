@@ -14,7 +14,7 @@ class Gear : public GameObject
 public:
     Gear(GameWorld *world);
 
-    virtual void update(sf::RenderWindow &window, sf::Time& elapsedTime);
+    virtual void update(sf::RenderWindow &window, float deltaTime);
 
     void checkPlayerCollision(sf::RenderWindow &window);
 };

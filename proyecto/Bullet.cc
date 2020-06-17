@@ -10,10 +10,8 @@ Bullet::Bullet(GameWorld *world) : GameObject(world, 1)
     resetBounces();
 }
 
-void Bullet::update(sf::RenderWindow &window, sf::Time &elapsedTime)
+void Bullet::update(sf::RenderWindow &window, float deltaTime)
 {
-    GameObject::update(window, elapsedTime);
-
     // check collision with wall and bounce
     std::vector<GameObject *> walls = world->getWalls();
 
@@ -72,6 +70,9 @@ void Bullet::update(sf::RenderWindow &window, sf::Time &elapsedTime)
             break;
         }
     }
+
+    // update pos
+    GameObject::update(window, deltaTime);
 
     // if its out of bounds, its get destroyed
     if (x < 0 || x > window.getSize().x || y < 0 || y > window.getSize().y)

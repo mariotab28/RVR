@@ -285,7 +285,7 @@ int GameWorld::createPlayer(const std::string &nick, sf::RenderWindow &window)
 
 void GameWorld::removePlayer(int i)
 {
-    if (players[i] != nullptr && players[i]->isActive())
+    if (i < players.size() && players[i] != nullptr && players[i]->isActive())
     {
         players[i]->setActive(false);
         static_cast<Player *>(players[i])->setPoints(0);
@@ -486,12 +486,12 @@ void GameWorld::render(sf::RenderWindow &window)
     }
 }
 
-void GameWorld::update(sf::RenderWindow &window, sf::Time &elapsedTime)
+void GameWorld::update(sf::RenderWindow &window, float deltaTime)
 {
     for (auto go : gameObjects)
     {
         if (go->isActive())
-            go->update(window, elapsedTime);
+            go->update(window, deltaTime);
     }
 
     updatePlayerTexts();

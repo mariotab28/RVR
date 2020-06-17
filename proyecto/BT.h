@@ -3,8 +3,10 @@
 #include <string.h>
 #include <sstream>
 #include <vector>
+#include <queue>
 #include <SFML/Graphics.hpp>
 
+#include "BTMessage.h"
 #include "Socket.h"
 
 namespace sf
@@ -16,6 +18,9 @@ namespace sf
     class Time;
 }; // namespace sf
 class GameWorld;
+
+static float FPS = 30;              // 30 Hz
+static float tickRate = 1000 / FPS; // 33.33 ms
 
 class BTServer
 {
@@ -40,14 +45,16 @@ private:
     sf::RenderWindow *window;
     sf::Color *bg;
     GameWorld *world;
-
-    float time;
+    
     sf::Clock *clock;
     sf::Time elapsedTime;
     int level;
 
     std::vector<Socket *> clients;
     Socket socket;
+    std::vector<sf::Thread *> clientThreads;
+
+    std::queue<BTMessage> inputMessages;
 };
 
 // -----------------------------------------------------------------------------
@@ -80,8 +87,6 @@ private:
 
     int index;
 
-    float time;
-    float deltaTime;
     sf::Clock *clock;
     sf::Time elapsedTime;
 };

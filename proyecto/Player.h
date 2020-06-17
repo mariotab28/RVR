@@ -33,7 +33,7 @@ public:
     virtual ~Player();
 
     virtual void render(sf::RenderWindow &window);
-    virtual void update(sf::RenderWindow &window, sf::Time& elapsedTime);
+    virtual void update(sf::RenderWindow &window, float deltaTime);
 
     void processInput(BTMessage message);
 

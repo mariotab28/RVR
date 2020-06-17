@@ -9,9 +9,9 @@ Gear::Gear(GameWorld *world) : GameObject(world, 1)
     setId("Gear");
 }
 
-void Gear::update(sf::RenderWindow &window, sf::Time& elapsedTime)
+void Gear::update(sf::RenderWindow &window, float deltaTime)
 {
-    GameObject::update(window, elapsedTime);
+    GameObject::update(window, deltaTime);
 
     checkPlayerCollision(window);
 }

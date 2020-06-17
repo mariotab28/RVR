@@ -1,12 +1,31 @@
 #include "BT.h"
 
+#include <ctime>
+
 #include "GameWorld.h"
-#include "BTMessage.h"
 #include "GameObject.h"
+
+static bool Sleep(const unsigned long &Time)
+{
+    clock_t Tick = clock_t(float(clock()) / float(CLOCKS_PER_SEC) * 1000.f);
+    if (Tick < 0) // if clock() fails, it returns -1
+        return 0;
+    clock_t Now = clock_t(float(clock()) / float(CLOCKS_PER_SEC) * 1000.f);
+    if (Now < 0)
+        return 0;
+    while ((Now - Tick) < Time)
+    {
+        Now = clock_t(float(clock()) / float(CLOCKS_PER_SEC) * 1000.f);
+        if (Now < 0)
+            return 0;
+    }
+    return 1;
+}
+
+// --------------------------------------------------
 
 void BTServer::start()
 {
-    time = 0;
     // ----WINDOW CREATION-----
     window = new sf::RenderWindow(sf::VideoMode(800, 600), "Window title");
     window->setTitle("Bouncy Tanks - SERVER");
@@ -52,6 +71,7 @@ void BTServer::do_messages()
             {
                 // añadir el client al vector clients
                 clients.push_back(client);
+                std::cout << "CLIENTS CONNECTED: " << clients.size() << "\n";
 
                 // enviar mensaje de accept con index
                 BTMessage acceptMessage;
@@ -61,16 +81,18 @@ void BTServer::do_messages()
                 acceptMessage.index = world->createPlayer(message.nick, *window);
                 if (acceptMessage.index != -1)
                     socket.send(acceptMessage, *clients[clients.size() - 1]);
+
+                // launch the client thread
+                clientThreads.push_back(new sf::Thread(&BTServer::do_messages, this));
+                clientThreads[clientThreads.size() - 1]->launch();
             }
 
-            std::cout << "CLIENTS CONNECTED: " << clients.size() << "\n";
             break;
         }
         case BTMessage::LOGOUT:
         {
             std::cout << "LOGOUT " << *client << "\n";
 
-            int pos = 0;
             // buscar si existe el socket client en el vector clients
             for (auto it = clients.begin(); it != clients.end(); ++it)
             {
@@ -79,10 +101,9 @@ void BTServer::do_messages()
                     delete *it;
                     clients.erase(it);
 
-                    world->removePlayer(pos);
+                    world->removePlayer(message.index);
                     break;
                 }
-                pos++;
             }
 
             std::cout << "CLIENTS CONNECTED: " << clients.size() << "\n";
@@ -90,11 +111,9 @@ void BTServer::do_messages()
         }
         case BTMessage::INPUT:
         {
-            // TODO: CREAR UN HILO DEDICADO A CADA CLIENTE??????
-
-            // transcribir el texto del mensaje a input
+            // save the input message into the queue
             if (message.message.size() > 0)
-                world->processInput(message);
+                inputMessages.push(message);
 
             break;
         }
@@ -109,17 +128,18 @@ void BTServer::simulate()
     while (true)
     {
         elapsedTime = clock->restart();
-        //deltaTime = elapsedTime.asMilliseconds();
-
-        //printf("time: %f deltaTime: %f\n", time, deltaTime);
-
-        //if (time > 33.33f)
-        //{
-        //time = 0;
+        float deltaTime = elapsedTime.asMilliseconds();
 
         // UPDATE WORLD
+        // transcribir el texto del mensaje a input
+        while (inputMessages.size() > 0)
+        {
+            world->processInput(inputMessages.front());
+            inputMessages.pop();
+        }
+
         // update
-        world->update(*window, elapsedTime);
+        world->update(*window, deltaTime/1000);
 
         // render
         window->clear(*bg);
@@ -129,6 +149,10 @@ void BTServer::simulate()
         // SEND WORLD TO ALL THE CLIENTS
         for (auto it = clients.begin(); it != clients.end(); ++it)
             socket.send(*world, *(*it));
+
+        // FORCE TICK RATE
+        if (tickRate > deltaTime)
+            Sleep(tickRate - deltaTime);
     }
 }
 
@@ -158,8 +182,6 @@ void BTClient::start()
     world->createObjects();
 
     clock = new sf::Clock();
-    time = 0;
-    deltaTime = 0;
 }
 
 void BTClient::login()
@@ -178,6 +200,7 @@ void BTClient::logout()
 
     BTMessage em(nick);
     em.type = BTMessage::LOGOUT;
+    em.index = index;
 
     socket.send(em, socket);
 }
@@ -195,7 +218,7 @@ void BTClient::input_thread()
         {
             // SEND INPUT MESSAGES TO SERVER
             if (socket.send(inputMessage, socket) < 0)
-                printf("send error!\n");
+                printf("ERROR: client send input\n");
         }
     }
 
@@ -206,6 +229,8 @@ void BTClient::net_thread()
 {
     while (window->isOpen())
     {
+        elapsedTime = clock->restart();
+
         // RECEIVE WORLD
         socket.recv(*world);
 
@@ -213,6 +238,11 @@ void BTClient::net_thread()
         window->clear(*bg);
         world->render(*window);
         window->display();
+
+        // FORCE TICK RATE
+        /*float deltaTime = elapsedTime.asMilliseconds();
+        if (tickRate > deltaTime)
+            Sleep(tickRate - deltaTime);*/
     }
 
     // TODO: METER ESTO EN METODO END() -------

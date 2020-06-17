@@ -25,4 +25,6 @@ int main(int argc, char **argv)
     thread.launch();
 
     ec.input_thread();
+
+    return 0;
 }

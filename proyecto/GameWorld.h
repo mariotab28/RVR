@@ -79,7 +79,7 @@ public:
     void updatePlayerTexts();
 
     void render(sf::RenderWindow &window);
-    void update(sf::RenderWindow &window, sf::Time &elapsedTime);
+    void update(sf::RenderWindow &window, float deltaTime);
     bool handleInput(sf::RenderWindow &window, BTMessage &message);
 
     void processInput(BTMessage message);

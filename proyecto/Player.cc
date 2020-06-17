@@ -18,7 +18,7 @@ Player::Player(GameWorld *world) : GameObject(world, 1)
     incSpeed = 80;
     incAngleSpeed = 110;
     reverse = false;
-    cooldown = 2;
+    cooldown = 0;
     time = 0;
 }
 
@@ -34,19 +34,15 @@ void Player::render(sf::RenderWindow &window)
     gun->render(window);
 }
 
-void Player::update(sf::RenderWindow &window, sf::Time &elapsedTime)
+void Player::update(sf::RenderWindow &window, float deltaTime)
 {
     // update shoot cooldown
     if (time > 0)
-        time -= elapsedTime.asSeconds();
-
-    // update gun position and rotation
-    gun->setPosition(x, y);
-    gun->setRotation(gun->getRotation() + gunIncAngle * elapsedTime.asSeconds());
+        time -= deltaTime;
 
     // update rotation
     int factor = reverse ? -1 : 1;
-    angle += incAngle * elapsedTime.asSeconds();
+    angle += incAngle * deltaTime;
     dirX = factor * cosf(angle * PI / 180);
     dirY = factor * sinf(angle * PI / 180);
     setRotation(angle);
@@ -56,9 +52,13 @@ void Player::update(sf::RenderWindow &window, sf::Time &elapsedTime)
     checkWallCollision();
 
     // update pos
-    x += dirX * speed * elapsedTime.asSeconds();
-    y += dirY * speed * elapsedTime.asSeconds();
+    x += dirX * speed * deltaTime;
+    y += dirY * speed * deltaTime;
     setPosition(x, y);
+
+    // update gun position and rotation
+    gun->setPosition(x, y);
+    gun->setRotation(gun->getRotation() + gunIncAngle * deltaTime);
 }
 
 void Player::processInput(BTMessage message)

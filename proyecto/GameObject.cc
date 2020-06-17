@@ -174,11 +174,11 @@ void GameObject::render(sf::RenderWindow &window)
         window.draw(*static_cast<sf::Sprite *>(entity));
 }
 
-void GameObject::update(sf::RenderWindow &window, sf::Time& elapsedTime)
+void GameObject::update(sf::RenderWindow &window, float deltaTime)
 {
     // update pos
-    x += dirX * speed * elapsedTime.asSeconds();
-    y += dirY * speed * elapsedTime.asSeconds();
+    x += dirX * speed * deltaTime;
+    y += dirY * speed * deltaTime;
     setPosition(x, y);
 
     // update dir
