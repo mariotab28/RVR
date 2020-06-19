@@ -371,7 +371,7 @@ void GameWorld::createBullet(float posX, float posY, float angle, std::string ow
     if (b != nullptr)
     {
         b->setPosition(posX, posY);
-        b->setSpeed(500);
+        b->setSpeed(300);
         b->setRotation(angle);
         b->setId("Bullet" + ownerId);
         b->setActive(true);

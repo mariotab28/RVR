@@ -18,7 +18,7 @@ Player::Player(GameWorld *world) : GameObject(world, 1)
     incSpeed = 80;
     incAngleSpeed = 110;
     reverse = false;
-    cooldown = 0;
+    cooldown = 1;
     time = 0;
 }
 

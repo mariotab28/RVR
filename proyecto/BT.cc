@@ -112,8 +112,10 @@ void BTServer::do_messages()
         case BTMessage::INPUT:
         {
             // save the input message into the queue
+            m.lock(); //mutex lock
             if (message.message.size() > 0)
                 inputMessages.push(message);
+            m.unlock(); //mutex unlock
 
             break;
         }
@@ -125,21 +127,25 @@ void BTServer::do_messages()
 
 void BTServer::simulate()
 {
+    elapsedTime = clock->restart();
     while (true)
     {
         elapsedTime = clock->restart();
-        float deltaTime = elapsedTime.asMilliseconds();
+        float deltaTime = tickRate;
 
         // UPDATE WORLD
+        // sacar de la cola de inputMessages y
         // transcribir el texto del mensaje a input
+        m.lock(); //mutex lock
         while (inputMessages.size() > 0)
         {
             world->processInput(inputMessages.front());
             inputMessages.pop();
         }
+        m.unlock(); //mutex unlock
 
         // update
-        world->update(*window, deltaTime/1000);
+        world->update(*window, deltaTime / 1000);
 
         // render
         window->clear(*bg);
@@ -151,8 +157,9 @@ void BTServer::simulate()
             socket.send(*world, *(*it));
 
         // FORCE TICK RATE
-        if (tickRate > deltaTime)
-            Sleep(tickRate - deltaTime);
+        float elapsed = elapsedTime.asMilliseconds();
+        if (tickRate > elapsed)
+            Sleep(tickRate - elapsed);
     }
 }
 
@@ -216,6 +223,9 @@ void BTClient::input_thread()
 
         if (world->handleInput(*window, inputMessage))
         {
+            // ARTIFICIAL LAG
+            //Sleep(100);
+
             // SEND INPUT MESSAGES TO SERVER
             if (socket.send(inputMessage, socket) < 0)
                 printf("ERROR: client send input\n");

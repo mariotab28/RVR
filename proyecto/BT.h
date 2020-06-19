@@ -4,6 +4,8 @@
 #include <sstream>
 #include <vector>
 #include <queue>
+#include <mutex>
+
 #include <SFML/Graphics.hpp>
 
 #include "BTMessage.h"
@@ -42,6 +44,8 @@ public:
     void simulate();
 
 private:
+    std::mutex m;
+    
     sf::RenderWindow *window;
     sf::Color *bg;
     GameWorld *world;
